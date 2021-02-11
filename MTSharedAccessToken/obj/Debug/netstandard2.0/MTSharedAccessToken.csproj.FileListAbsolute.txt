@@ -1,0 +1,9 @@
+H:\Prodution\MasterTechSolution\DMO_API\MTSharedAccessToken\bin\Debug\netstandard2.0\MTSharedAccessToken.deps.json
+H:\Prodution\MasterTechSolution\DMO_API\MTSharedAccessToken\bin\Debug\netstandard2.0\MTSharedAccessToken.dll
+H:\Prodution\MasterTechSolution\DMO_API\MTSharedAccessToken\obj\Debug\netstandard2.0\MTSharedAccessToken.csprojAssemblyReference.cache
+H:\Prodution\MasterTechSolution\DMO_API\MTSharedAccessToken\obj\Debug\netstandard2.0\MTSharedAccessToken.AssemblyInfoInputs.cache
+H:\Prodution\MasterTechSolution\DMO_API\MTSharedAccessToken\obj\Debug\netstandard2.0\MTSharedAccessToken.AssemblyInfo.cs
+H:\Prodution\MasterTechSolution\DMO_API\MTSharedAccessToken\bin\Debug\netstandard2.0\MTSharedAccessToken.pdb
+H:\Prodution\MasterTechSolution\DMO_API\MTSharedAccessToken\obj\Debug\netstandard2.0\MTSharedAccessToken.csproj.CoreCompileInputs.cache
+H:\Prodution\MasterTechSolution\DMO_API\MTSharedAccessToken\obj\Debug\netstandard2.0\MTSharedAccessToken.dll
+H:\Prodution\MasterTechSolution\DMO_API\MTSharedAccessToken\obj\Debug\netstandard2.0\MTSharedAccessToken.pdb

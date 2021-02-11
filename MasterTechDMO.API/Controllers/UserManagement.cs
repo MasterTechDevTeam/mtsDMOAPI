@@ -26,9 +26,10 @@ namespace MasterTechDMO.API.Controllers
         private UserManagementServices _userManagementServices;
         private IConfiguration _confifuraton;
         public UserManagement(UserManager<DMOUsers> userManager,
+            SignInManager<DMOUsers> signInManager,
              IConfiguration confifuraton)
 		{
-            _userManagementServices = new UserManagementServices(userManager, confifuraton);
+            _userManagementServices = new UserManagementServices(userManager, signInManager, confifuraton);
 
         }
 
@@ -69,6 +70,13 @@ namespace MasterTechDMO.API.Controllers
             {
                 return StatusCode(500, Ex.Message);
             }
+        }
+
+        [HttpPost]
+        [Route("loginUser")]
+        public async Task<IActionResult> LoginUserAsync()
+        {
+            return Ok();
         }
     }
 }

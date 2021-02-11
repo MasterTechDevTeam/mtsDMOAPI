@@ -2,6 +2,7 @@
 using MasterTechDMO.API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using mtsDMO.Context.UserManagement;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,16 +11,18 @@ using System.Threading.Tasks;
 
 namespace MasterTechDMO.API.Repos
 {
-	public class UserManagementRepo : IUserManagementRepo
+    public class UserManagementRepo : IUserManagementRepo
     {
         private UserManager<DMOUsers> _userManager;
+        private SignInManager<DMOUsers> _signInManager;
 
-        public UserManagementRepo(UserManager<DMOUsers> userManager)
+        public UserManagementRepo(UserManager<DMOUsers> userManager, SignInManager<DMOUsers> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        public async Task<APICallResponse<string>> RegisterUserAsync(DMOUsers user,string password)
+        public async Task<APICallResponse<string>> RegisterUserAsync(DMOUsers user, string password)
         {
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
@@ -31,15 +34,15 @@ namespace MasterTechDMO.API.Repos
                 return new APICallResponse<string>
                 {
                     IsSuccess = true,
-                    Status="Success",
-                    Message = new List<string>(){ "User Registered and Verification Token Generated" },
+                    Status = "Success",
+                    Message = new List<string>() { "User Registered and Verification Token Generated" },
                     Respose = tokenCode
                 };
             }
             else
             {
                 List<string> iError = result.Errors.Select(x => x.Description).ToList();
-               
+
                 return new APICallResponse<string>
                 {
                     IsSuccess = false,
@@ -60,7 +63,7 @@ namespace MasterTechDMO.API.Repos
                     return new APICallResponse<bool>
                     {
                         IsSuccess = true,
-                        Status  = "Warning",
+                        Status = "Warning",
                         Message = new List<string>() { "No user found." },
                         Respose = false
                     };
@@ -78,7 +81,7 @@ namespace MasterTechDMO.API.Repos
                         Message = new List<string>() { "User Verified Successfully" },
                         Respose = true
                     };
-                 
+
                 }
                 else
                 {
@@ -89,7 +92,7 @@ namespace MasterTechDMO.API.Repos
                         IsSuccess = false,
                         Message = iError,
                         Status = "IdentityError",
-                        Respose =false
+                        Respose = false
                     };
                 }
             }
@@ -100,11 +103,58 @@ namespace MasterTechDMO.API.Repos
                 return new APICallResponse<bool>
                 {
                     IsSuccess = false,
-                    Message = new List<string>() {Ex.Message},
+                    Message = new List<string>() { Ex.Message },
                     Status = "Error",
                     Respose = false
                 };
             }
+        }
+
+        public async Task<APICallResponse<IList<string>>> LoginUserAsync(UserLogin user)
+        {
+            var response = new APICallResponse<IList<string>>();
+            try
+            {
+                var result = await _signInManager.PasswordSignInAsync(user.EmailId, user.Password, user.IsRemberMe, true);
+                if (result.Succeeded)
+                {
+                    var claims = await _userManager.GetRolesAsync(await _userManager.FindByNameAsync(user.EmailId));
+                    response.Message = new List<string>() { "User Logged In" };
+                    response.Respose = claims;
+                    response.Status = "Success";
+                }
+                else if (result.RequiresTwoFactor)
+                {
+                    response.Message = new List<string>() { "Required Two Factor Authentication" };
+                    response.Respose = null;
+                    response.Status = "Warning";
+                }
+                else if (result.IsLockedOut)
+                {
+                    response.Message = new List<string>() { "User account is locked out." };
+                    response.Respose = null;
+                    response.Status = "Warning";
+                }
+                else
+                {
+                    response.Message = new List<string>() { "Invalid login attempt" };
+                    response.Respose = null;
+                    response.Status = "Warning";
+                }
+                response.IsSuccess = true;
+                return response;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<IList<string>>
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message, Ex.InnerException.ToString() },
+                    Respose = null,
+                    Status = "Error"
+                };
+            }
+
         }
     }
 }
