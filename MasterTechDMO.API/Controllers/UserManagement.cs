@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using MasterTechDMO.API.Services;
 using Microsoft.Extensions.Configuration;
 using mtsDMO.Context.UserManagement;
+using Newtonsoft.Json;
 
 namespace MasterTechDMO.API.Controllers
 {
@@ -23,60 +24,71 @@ namespace MasterTechDMO.API.Controllers
 		//private readonly SignInManager<DMOUsers> _signInManager;
 		//private readonly UserManager<DMOUsers> _userManager;
 
-        private UserManagementServices _userManagementServices;
-        private IConfiguration _confifuraton;
-        public UserManagement(UserManager<DMOUsers> userManager,
-            SignInManager<DMOUsers> signInManager,
-             IConfiguration confifuraton)
+		private UserManagementServices _userManagementServices;
+		private IdentityRoleService _identityRoleService;
+		private IConfiguration _confifuraton;
+		public UserManagement(UserManager<DMOUsers> userManager,
+			SignInManager<DMOUsers> signInManager,
+			IServiceProvider serviceProvider,
+			 IConfiguration confifuraton)
 		{
-            _userManagementServices = new UserManagementServices(userManager, signInManager, confifuraton);
+			_identityRoleService = new IdentityRoleService(serviceProvider); 
+			_userManagementServices = new UserManagementServices(userManager, signInManager, confifuraton);
+		}
 
-        }
 
+		[HttpPost]
+		[Route("registerUser")]
+		public async Task<IActionResult> RegisterUserAsync(UserRegistration user)
+		{
+			try
+			{
+				string returnURL = string.Empty;
+				if (Request.Headers.ContainsKey("returnUrl"))
+				{
+					returnURL = Request.Headers.Single(x => x.Key == "returnUrl").Value;
+				}
+				return Ok(await _userManagementServices.RegisterUserAsync(user, returnURL));
+			}
+			catch (Exception Ex)
+			{
+				return StatusCode(500, Ex.Message);
+			}
+		}
 
-        [HttpPost]
-        [Route("registerUser")]
-        public async Task<IActionResult> RegisterUserAsync(UserRegistration user)
-        {
-            try
-            {
-                string returnURL = string.Empty;
-                if (Request.Headers.ContainsKey("returnUrl"))
-                {
-                    returnURL = Request.Headers.Single(x => x.Key == "returnUrl").Value;
-                }
-                return Ok(await _userManagementServices.RegisterUserAsync(user, returnURL));
-            }
-            catch (Exception Ex)
-            {
-                return StatusCode(500, Ex.Message);
-            }
-        }
+		[HttpGet]
+		[Route("verifyUser")]
+		public async Task<IActionResult> VerifyUserAsync(string code)
+		{
+			try
+			{
+				string userId = string.Empty;
+				if (Request.Headers.ContainsKey("userId"))
+				{
+					userId = Request.Headers.Single(x => x.Key == "userId").Value;
+				}
+				return Ok(await _userManagementServices.VerifyUserAsync(userId, code));
+			}
+			catch (Exception Ex)
+			{
+				return StatusCode(500, Ex.Message);
+			}
+		}
 
-        [HttpGet]
-        [Route("verifyUser")]
-        public async Task<IActionResult> VerifyUserAsync(string code)
-        {
-            try
-            {
-                string userId = string.Empty;
-                if (Request.Headers.ContainsKey("userId"))
-                {
-                    userId = Request.Headers.Single(x => x.Key == "userId").Value;
-                }
-                return Ok(await _userManagementServices.VerifyUserAsync(userId, code));
-            }
-            catch (Exception Ex)
-            {
-                return StatusCode(500, Ex.Message);
-            }
-        }
+		[HttpPost]
+		[Route("loginUser")]
+		public async Task<IActionResult> LoginUserAsync(UserLogin user)
+		{
+			return Ok(await _userManagementServices.LoginUserAsync(user));
+		}
 
-        [HttpPost]
-        [Route("loginUser")]
-        public async Task<IActionResult> LoginUserAsync()
-        {
-            return Ok();
-        }
-    }
+		//[Authorize]
+		[HttpGet]
+		[Route("CreateRole/{Payload}")]
+		public async Task<IActionResult> CreateRoleAsync(string Payload)
+		{
+			var rolename = JsonConvert.DeserializeObject<string[]>(Payload);
+			return Ok(await _identityRoleService.CreateRolesAsync(rolename));
+		}
+	}
 }

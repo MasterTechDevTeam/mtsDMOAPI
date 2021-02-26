@@ -160,6 +160,7 @@ namespace MasterTechDMO.API.Services
                 var loginResponse = new APICallResponse<string>();
                 var response = await _userManagementRepo.LoginUserAsync(user);
                 loginResponse.Message = response.Message;
+                loginResponse.Status = response.Status;
                 if (response.IsSuccess && response.Respose != null)
                 {
                     var tokenSettings = new SharedAccessTokenSettings();
