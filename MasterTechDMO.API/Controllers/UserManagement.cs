@@ -14,6 +14,7 @@ using MasterTechDMO.API.Services;
 using Microsoft.Extensions.Configuration;
 using mtsDMO.Context.UserManagement;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace MasterTechDMO.API.Controllers
 {
@@ -82,12 +83,12 @@ namespace MasterTechDMO.API.Controllers
 			return Ok(await _userManagementServices.LoginUserAsync(user));
 		}
 
-		//[Authorize]
-		[HttpGet]
+        [HttpGet]
 		[Route("CreateRole/{Payload}")]
+        [Authorize(AuthenticationSchemes =JwtBearerDefaults.AuthenticationScheme)]
 		public async Task<IActionResult> CreateRoleAsync(string Payload)
 		{
-			var rolename = JsonConvert.DeserializeObject<string[]>(Payload);
+			var rolename =Payload.Split(',').ToArray();
 			return Ok(await _identityRoleService.CreateRolesAsync(rolename));
 		}
 	}
