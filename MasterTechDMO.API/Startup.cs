@@ -21,100 +21,100 @@ using MTSharedAccessToken.Services;
 
 namespace MasterTechDMO.API
 {
-	public class Startup
-	{
-		public Startup(IConfiguration configuration)
-		{
-			Configuration = configuration;
-		}
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
 
-		public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; }
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
-		{
-			services.AddDbContext<MTDMOContext>(options =>
-				   options.UseSqlServer(
-					   Configuration.GetConnectionString("MTDMOContextConnection")));
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDbContext<MTDMOContext>(options =>
+                   options.UseSqlServer(
+                       Configuration.GetConnectionString("MTDMOContextConnection")));
 
-			services.AddIdentity<DMOUsers, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-				.AddEntityFrameworkStores<MTDMOContext>()
-				.AddTokenProvider<DataProtectorTokenProvider<DMOUsers>>(TokenOptions.DefaultProvider);
+            services.AddIdentity<DMOUsers, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<MTDMOContext>()
+                .AddTokenProvider<DataProtectorTokenProvider<DMOUsers>>(TokenOptions.DefaultProvider);
 
-			// Create Group policy
-			services.AddAuthorization(option =>
-			{
-				option.AddPolicy("OnlyForOrganization", policy => policy.RequireRole("System_Admin", "Super_Admin", "Restaurant_Admin"));
-			});
+            // Create Group policy
+            services.AddAuthorization(option =>
+            {
+                option.AddPolicy("OnlyForOrganization", policy => policy.RequireRole("System_Admin", "Super_Admin", "Restaurant_Admin"));
+            });
 
-			var sharedTokenSettings = new SharedAccessTokenSettings();
-			Configuration.Bind("JWTSettings", sharedTokenSettings);
-			var tokenValidationParms = MTSharedAccessTokenService.VerifySharedTokenSettings(sharedTokenSettings);
+            var sharedTokenSettings = new SharedAccessTokenSettings();
+            Configuration.Bind("JWTSettings", sharedTokenSettings);
+            var tokenValidationParms = MTSharedAccessTokenService.VerifySharedTokenSettings(sharedTokenSettings);
 
-			services.AddAuthentication(x =>
-			{
-				x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-				x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-			}).AddJwtBearer(x =>
-			{
-				x.RequireHttpsMetadata = false;
-				x.TokenValidationParameters = tokenValidationParms;
-			});
+            }).AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.TokenValidationParameters = tokenValidationParms;
+            });
 
-			services.AddControllers();
+            services.AddControllers();
 
-			services.AddSwaggerGen(c =>
-			{
-				c.SwaggerDoc("v1", new OpenApiInfo
-				{
-					Title = "MasterTechSolution DMO",
-					Version = "v1",
-					Description = "This API is all about DMO. How you can use our API and what parameters it takes and what will each API return",
-					Contact = new OpenApiContact
-					{
-						Name = "MasterTech Solution",
-						Email = "mastertech_dev@gmail.com",
-						Url = new Uri("https://mastertechsolution.com")
-					}
-				});
-			});
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "MasterTechSolution DMO",
+                    Version = "v1",
+                    Description = "This API is all about DMO. How you can use our API and what parameters it takes and what will each API return",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "MasterTech Solution",
+                        Email = "mastertech_dev@gmail.com",
+                        Url = new Uri("https://mastertechsolution.com")
+                    }
+                });
+            });
 
 
-		}
+        }
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
-		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
-			app.UseSwagger();
-			app.UseSwaggerUI(c =>
-			{
-				c.SwaggerEndpoint("/swagger/v1/swagger.json", "MasterTechSolution DMO API");
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MasterTechSolution DMO API");
 
-				// To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
-				c.RoutePrefix = string.Empty;
-			});
+                // To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
+                c.RoutePrefix = string.Empty;
+            });
 
-			app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
 
-			app.UseRouting();
+            app.UseRouting();
 
-			app.UseAuthorization();
-			app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseAuthentication();
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllers();
-			});
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
 
-			// Create role on startup of the API Projet
-			IdentityRoleService identityRoleService = new IdentityRoleService(serviceProvider);
-			identityRoleService.CreateRolesAsync(Configuration.GetSection("RoleList")?.GetChildren()?.Select(x => x.Value)?.ToArray()).Wait();
-		}
-	}
+            // Create role on startup of the API Projet
+            IdentityRoleService identityRoleService = new IdentityRoleService(serviceProvider, null);
+            identityRoleService.CreateBaseRolesAsync(Configuration.GetSection("RoleList")?.GetChildren()?.Select(x => x.Value)?.ToArray()).Wait();
+        }
+    }
 }

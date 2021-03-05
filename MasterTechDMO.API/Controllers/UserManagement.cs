@@ -20,6 +20,7 @@ namespace MasterTechDMO.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 	public class UserManagement : ControllerBase
 	{
 		//private readonly SignInManager<DMOUsers> _signInManager;
@@ -31,15 +32,17 @@ namespace MasterTechDMO.API.Controllers
 		public UserManagement(UserManager<DMOUsers> userManager,
 			SignInManager<DMOUsers> signInManager,
 			IServiceProvider serviceProvider,
-			 IConfiguration confifuraton)
+			 IConfiguration confifuraton,
+			 MTDMOContext context)
 		{
-			_identityRoleService = new IdentityRoleService(serviceProvider); 
+			_identityRoleService = new IdentityRoleService(serviceProvider, context); 
 			_userManagementServices = new UserManagementServices(userManager, signInManager, confifuraton);
 		}
 
 
 		[HttpPost]
 		[Route("registerUser")]
+		[AllowAnonymous]
 		public async Task<IActionResult> RegisterUserAsync(UserRegistration user)
 		{
 			try
@@ -59,6 +62,7 @@ namespace MasterTechDMO.API.Controllers
 
 		[HttpGet]
 		[Route("verifyUser")]
+		[AllowAnonymous]
 		public async Task<IActionResult> VerifyUserAsync(string code)
 		{
 			try
@@ -78,18 +82,19 @@ namespace MasterTechDMO.API.Controllers
 
 		[HttpPost]
 		[Route("loginUser")]
+		[AllowAnonymous]
 		public async Task<IActionResult> LoginUserAsync(UserLogin user)
 		{
 			return Ok(await _userManagementServices.LoginUserAsync(user));
 		}
 
-        [HttpGet]
-		[Route("CreateRole/{Payload}")]
-        [Authorize(AuthenticationSchemes =JwtBearerDefaults.AuthenticationScheme)]
-		public async Task<IActionResult> CreateRoleAsync(string Payload)
+		[HttpGet]
+		[Route("getUserByEmail/{EmailId}")]
+		public async Task<IActionResult> GetUserByEmailAsync(string EmailId)
 		{
-			var rolename =Payload.Split(',').ToArray();
-			return Ok(await _identityRoleService.CreateRolesAsync(rolename));
+			return Ok(await _userManagementServices.GetUserByEmailAsync(EmailId));
 		}
+
+
 	}
 }

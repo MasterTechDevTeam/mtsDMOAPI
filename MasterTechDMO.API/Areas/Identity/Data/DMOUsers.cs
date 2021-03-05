@@ -19,6 +19,9 @@ namespace MasterTechDMO.API.Areas.Identity.Data
         public string Country { get; set; }
         public string ContactNo { get; set; }
         public string DateofBirth { get; set; }
-        public string UserType { get; set; }
+        //public string UserType { get; set; }
+        public Guid? OrgId { get; set; }
+        public bool IsOrg { get; set; }
+
     }
 }

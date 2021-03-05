@@ -30,17 +30,22 @@ namespace MasterTechDMO.API.Services
         {
             if (user != null)
             {
+                if (user.UserType == Constants.BaseRole.OrgUser)
+                {
+
+                }
+
                 var dmoUser = new DMOUsers
                 {
                     Id = user.UserId.ToString(),
-
                     Email = user.EmailId,
                     UserName = user.EmailId,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     ContactNo = user.ContactNo,
                     DateofBirth = user.DateofBirth,
-                    UserType = user.UserType,
+                    IsOrg = user.UserType == Constants.BaseRole.Org ? true : false,
+                    OrgId = Guid.Empty,
                     Address = user.Address,
                     City = user.City,
                     Zipcode = user.Zipcode,
@@ -109,9 +114,9 @@ namespace MasterTechDMO.API.Services
                 string strMailBody = string.Empty;
                 if (UserType == "OrganizationUser")
                 {
+                    //$"<a href='{verificationLink}'> Verify Account </a>" +
                     strMailBody = string.Format($"Hello {username}, " +
                             $"<br/> Thank you for registration. Your User Id will approve by your organizational admin." +
-                            //$"<a href='{verificationLink}'> Verify Account </a>" +
                             $"<br/>Thank You.<br/>");
                 }
                 else
@@ -165,7 +170,7 @@ namespace MasterTechDMO.API.Services
                 {
                     var tokenSettings = new SharedAccessTokenSettings();
                     _configuration.Bind("JWTSettings", tokenSettings);
-                    string token = MTSharedAccessTokenService.GenerateUserAccessToken(tokenSettings,response.Respose);
+                    string token = MTSharedAccessTokenService.GenerateUserAccessToken(tokenSettings, response.Respose);
                     if (token == string.Empty)
                         loginResponse.Message.Add("Something went wrong while creating token.");
                     loginResponse.Respose = token;
@@ -182,6 +187,59 @@ namespace MasterTechDMO.API.Services
                     Message = new List<string>() { Ex.InnerException.ToString() },
                     Status = "Error",
                     Respose = Ex.Message
+                };
+            }
+        }
+
+        public async Task<APICallResponse<UserDetails>> GetUserByEmailAsync(string EmailId)
+        {
+            try
+            {
+                APICallResponse<UserDetails> data = new APICallResponse<UserDetails>();
+                var result = await _userManagementRepo.GetUserByEmailAsync(EmailId);
+
+                data.IsSuccess = result.IsSuccess;
+                data.Message = result.Message;
+                data.Status = result.Status;
+                if (result.Respose != null)
+                {
+                    string userType = string.Empty;
+                    if (result.Respose.IsOrg)
+                        userType = Constants.BaseRole.Org;
+                    else if (result.Respose.OrgId != Guid.Empty)
+                        userType = Constants.BaseRole.OrgUser;
+                    else
+                        userType = Constants.BaseRole.Indevidual;
+
+                    UserDetails userDetails = new UserDetails
+                    {
+                        UserId = Guid.Parse(result.Respose.Id),
+                        FirstName = result.Respose.FirstName,
+                        LastName = result.Respose.LastName,
+                        EmailId = result.Respose.Email,
+                        Address = result.Respose.Address,
+                        City = result.Respose.City,
+                        UserType = userType,
+                        ContactNo = result.Respose.ContactNo,
+                        Country = result.Respose.Country,
+                        DateofBirth = result.Respose.DateofBirth,
+                        State = result.Respose.State,
+                        Zipcode = result.Respose.Zipcode
+                    };
+
+                    data.Respose = userDetails;
+                }
+
+                return data;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<UserDetails>()
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.InnerException.ToString() },
+                    Status = "Error",
+                    Respose = null
                 };
             }
         }

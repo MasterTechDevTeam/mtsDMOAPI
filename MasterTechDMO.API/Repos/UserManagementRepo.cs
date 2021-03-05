@@ -98,8 +98,6 @@ namespace MasterTechDMO.API.Repos
             }
             catch (Exception Ex)
             {
-
-
                 return new APICallResponse<bool>
                 {
                     IsSuccess = false,
@@ -119,13 +117,13 @@ namespace MasterTechDMO.API.Repos
                 if (result.Succeeded)
                 {
                     var claims = await _userManager.GetRolesAsync(await _userManager.FindByNameAsync(user.EmailId));
-                    response.Message = new List<string>() { "User Logged In" };
+                    response.Message = new List<string>() { "User Logged In." };
                     response.Respose = claims;
                     response.Status = "Success";
                 }
                 else if (result.RequiresTwoFactor)
                 {
-                    response.Message = new List<string>() { "Required Two Factor Authentication" };
+                    response.Message = new List<string>() { "Required Two Factor Authentication." };
                     response.Respose = null;
                     response.Status = "Warning";
                 }
@@ -137,7 +135,7 @@ namespace MasterTechDMO.API.Repos
                 }
                 else
                 {
-                    response.Message = new List<string>() { "Invalid login attempt" };
+                    response.Message = new List<string>() { "EmailId or password is invalid." };
                     response.Respose = null;
                     response.Status = "Warning";
                 }
@@ -155,6 +153,44 @@ namespace MasterTechDMO.API.Repos
                 };
             }
 
+        }
+
+        public async Task<APICallResponse<DMOUsers>> GetUserByEmailAsync(string EmailId)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(EmailId);
+                if (user == null)
+                {
+                    return new APICallResponse<DMOUsers>
+                    {
+                        IsSuccess = true,
+                        Status = "Warning",
+                        Message = new List<string>() { "No user found." },
+                        Respose = null
+                    };
+                }
+
+                return new APICallResponse<DMOUsers>
+                {
+                    IsSuccess = true,
+                    Status = "Success",
+                    Message = new List<string>() { "User Found" },
+                    Respose = user
+                };
+
+            }
+            catch (Exception Ex)
+            {
+
+                return new APICallResponse<DMOUsers>
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message },
+                    Status = "Error",
+                    Respose = null
+                };
+            }
         }
     }
 }

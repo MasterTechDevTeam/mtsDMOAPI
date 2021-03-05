@@ -4,14 +4,16 @@ using MasterTechDMO.API.Areas.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MasterTechDMO.API.Migrations
 {
     [DbContext(typeof(MTDMOContext))]
-    partial class MTDMOContextModelSnapshot : ModelSnapshot
+    [Migration("20210303171616_Add_tb_DMOOrgRole_N_Alt_AspNetUser_AddOrgField")]
+    partial class Add_tb_DMOOrgRole_N_Alt_AspNetUser_AddOrgField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,6 +122,9 @@ namespace MasterTechDMO.API.Migrations
                     b.Property<string>("UserName")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
+
+                    b.Property<string>("UserType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Zipcode")
                         .HasColumnType("nvarchar(max)");
