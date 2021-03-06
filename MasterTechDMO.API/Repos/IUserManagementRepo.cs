@@ -10,7 +10,7 @@ namespace MasterTechDMO.API.Repos
     {
         Task<APICallResponse<string>> RegisterUserAsync(DMOUsers user,string password);
 
-        Task<APICallResponse<bool>> VerifyUserAsync(string userId, string code);
+        Task<APICallResponse<bool>> VerifyUserAsync(string emailId, string code);
 
         Task<APICallResponse<IList<string>>> LoginUserAsync(UserLogin user);
         Task<APICallResponse<DMOUsers>> GetUserByEmailAsync(string EmailId);

@@ -63,16 +63,16 @@ namespace MasterTechDMO.API.Controllers
 		[HttpGet]
 		[Route("verifyUser")]
 		[AllowAnonymous]
-		public async Task<IActionResult> VerifyUserAsync(string code)
+		public async Task<IActionResult> VerifyUserAsync(string verificationCode)
 		{
 			try
 			{
-				string userId = string.Empty;
-				if (Request.Headers.ContainsKey("userId"))
+				string emailId = string.Empty;
+				if (Request.Headers.ContainsKey("emailId"))
 				{
-					userId = Request.Headers.Single(x => x.Key == "userId").Value;
+					emailId = Request.Headers.Single(x => x.Key == "emailId").Value;
 				}
-				return Ok(await _userManagementServices.VerifyUserAsync(userId, code));
+				return Ok(await _userManagementServices.VerifyUserAsync(emailId, verificationCode));
 			}
 			catch (Exception Ex)
 			{

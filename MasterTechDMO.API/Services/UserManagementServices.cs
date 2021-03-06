@@ -80,12 +80,12 @@ namespace MasterTechDMO.API.Services
 
         }
 
-        public async Task<APICallResponse<bool>> VerifyUserAsync(string userId, string code)
+        public async Task<APICallResponse<bool>> VerifyUserAsync(string emailId, string code)
         {
             if (code != string.Empty)
             {
                 code = HttpUtility.UrlDecode(code);
-                var callResponse = await _userManagementRepo.VerifyUserAsync(userId, code);
+                var callResponse = await _userManagementRepo.VerifyUserAsync(emailId, code);
                 return callResponse;
             }
 

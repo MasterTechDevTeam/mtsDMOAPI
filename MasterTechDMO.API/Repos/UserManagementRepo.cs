@@ -53,11 +53,11 @@ namespace MasterTechDMO.API.Repos
             }
         }
 
-        public async Task<APICallResponse<bool>> VerifyUserAsync(string userId, string code)
+        public async Task<APICallResponse<bool>> VerifyUserAsync(string emailId, string code)
         {
             try
             {
-                var user = await _userManager.FindByIdAsync(userId);
+                var user = await _userManager.FindByEmailAsync(emailId);
                 if (user == null)
                 {
                     return new APICallResponse<bool>
@@ -77,7 +77,7 @@ namespace MasterTechDMO.API.Repos
                     return new APICallResponse<bool>
                     {
                         IsSuccess = true,
-                        Status = "Warning",
+                        Status = "Success",
                         Message = new List<string>() { "User Verified Successfully" },
                         Respose = true
                     };
