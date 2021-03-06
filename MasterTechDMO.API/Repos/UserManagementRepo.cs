@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace MasterTechDMO.API.Repos
 {
@@ -29,7 +30,8 @@ namespace MasterTechDMO.API.Repos
             {
                 var tokenCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                tokenCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
+                //tokenCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
+                tokenCode = HttpUtility.UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
 
                 return new APICallResponse<string>
                 {
@@ -69,7 +71,7 @@ namespace MasterTechDMO.API.Repos
                     };
                 }
 
-                code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+                //code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
                 var result = await _userManager.ConfirmEmailAsync(user, code);
                 if (result.Succeeded)
                 {
