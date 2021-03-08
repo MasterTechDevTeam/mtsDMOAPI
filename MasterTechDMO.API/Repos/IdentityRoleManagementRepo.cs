@@ -98,11 +98,106 @@ namespace MasterTechDMO.API.Repos
             };
         }
 
-        public Task<APICallResponse<bool>> GetRoleAsync(string userId)
+        public async Task<APICallResponse<List<DMOOrgRoles>>> GetRolesAsync(Guid orgId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var lstOrgRoles = new APICallResponse<List<DMOOrgRoles>>();
+                if (orgId != null && IsOrgUser(orgId))
+                {
+                    lstOrgRoles.Respose = _context.DMOOrgRoles.Where(x => x.OrgId == orgId).ToList();
+                    lstOrgRoles.Message = new List<string> { $"{lstOrgRoles.Respose.Count} roles founds." };
+                    lstOrgRoles.Status = "Success";
+                }
+                else if (orgId != null && IsMTAdmin(orgId))
+                {
+                    lstOrgRoles.Respose = _context.DMOOrgRoles.ToList();
+                    lstOrgRoles.Message = new List<string> { $"{lstOrgRoles.Respose.Count} roles founds." };
+                    lstOrgRoles.Status = "Success";
+                }
+                else
+                {
+                    lstOrgRoles.Respose = null;
+                    lstOrgRoles.Message = new List<string> { "Either user not found or user is missing permission." };
+                    lstOrgRoles.Status = "Warning";
+                }
+
+                lstOrgRoles.IsSuccess = true;
+                return lstOrgRoles;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<List<DMOOrgRoles>>
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message },
+                    Status = "Error",
+                    Respose = null
+                };
+            }
         }
 
+        public async Task<APICallResponse<bool>> CheckUserInRole(Guid Id)
+        {
+            try
+            {
+                var callResponse = new APICallResponse<bool>();
+
+                var userInRole = _context.UserRoles.Where(x => x.UserId == Id.ToString()).FirstOrDefault();
+                if (userInRole != null)
+                {
+                    var roleDetails = _context.Roles.Where(x => x.Id == userInRole.RoleId).FirstOrDefault();
+                    if (roleDetails.Name == Constants.BaseRole.MTAdmin || roleDetails.Name == Constants.BaseRole.Org)
+                    {
+                        callResponse.Respose = true;
+                        callResponse.Message = new List<string> { $"user {Id} found with {roleDetails.Name} role" };
+                        callResponse.Status = "Success";
+                    }
+                }
+                else
+                {
+                    callResponse.Respose = false;
+                    callResponse.Message = new List<string> { "User not found." };
+                    callResponse.Status = "Warning";
+                }
+                callResponse.IsSuccess = true;
+                return callResponse;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message },
+                    Status = "Error",
+                    Respose = false
+                };
+            }
+        }
+
+        public async Task<KeyValuePair<bool, string>> CreateBaseRoleAsync(string roleName)
+        {
+            try
+            {
+                var roleManager = _serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+                var roleCheck = await roleManager.RoleExistsAsync(roleName);
+
+                if (!roleCheck)
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                    return new KeyValuePair<bool, string>(true, $"{roleName} created sucessfully");
+                }
+                return new KeyValuePair<bool, string>(true, $"{roleName} role already exists.");
+
+            }
+            catch (Exception Ex)
+            {
+                return new KeyValuePair<bool, string>(false, Ex.Message);
+            }
+        }
+
+        #region Helper Methods
         private bool MapOrgWithRole(Guid orgId, string roleName)
         {
             try
@@ -128,26 +223,61 @@ namespace MasterTechDMO.API.Repos
             }
         }
 
-        public async Task<KeyValuePair<bool, string>> CreateBaseRoleAsync(string roleName)
+        private bool IsOrgUser(Guid orgId)
         {
             try
             {
-                var roleManager = _serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-                var roleCheck = await roleManager.RoleExistsAsync(roleName);
-
-                if (!roleCheck)
+                var orgUserData = _context.Users.Where(x => x.Id == orgId.ToString() && x.IsOrg == true).FirstOrDefault();
+                if (orgUserData != null)
                 {
-                    await roleManager.CreateAsync(new IdentityRole(roleName));
-                    return new KeyValuePair<bool, string>(true, $"{roleName} created sucessfully");
+                    var userInRole = _context.UserRoles.Where(x => x.UserId == orgId.ToString()).FirstOrDefault();
+                    if (userInRole != null)
+                    {
+                        var roleDetails = _context.Roles.Where(x => x.Id == userInRole.RoleId).FirstOrDefault();
+                        if (roleDetails.Name == Constants.BaseRole.Org)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                    return false;
                 }
-                return new KeyValuePair<bool, string>(true, $"{roleName} role already exists.");
-
+                else
+                    return false;
             }
             catch (Exception Ex)
             {
-                return new KeyValuePair<bool, string>(false, Ex.Message);
+                return false;
             }
         }
+
+        private bool IsMTAdmin(Guid userId)
+        {
+            try
+            {
+                var userData = _context.Users.Where(x => x.Id == userId.ToString()).FirstOrDefault();
+                if (userData != null)
+                {
+                    var userInRole = _context.UserRoles.Where(x => x.UserId == userId.ToString()).FirstOrDefault();
+                    if (userInRole != null)
+                    {
+                        var roleDetails = _context.Roles.Where(x => x.Id == userInRole.RoleId).FirstOrDefault();
+                        if (roleDetails.Name == Constants.BaseRole.MTAdmin)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                    return false;
+                }
+                else
+                    return false;
+            }
+            catch (Exception Ex)
+            {
+                return false;
+            }
+        }
+        #endregion
     }
 }

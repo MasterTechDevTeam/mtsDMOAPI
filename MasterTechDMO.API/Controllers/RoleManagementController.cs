@@ -15,38 +15,34 @@ namespace MasterTechDMO.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-	public class RoleManagementController : ControllerBase
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public class RoleManagementController : ControllerBase
     {
 
-		private IdentityRoleService _identityRoleService;
-		private IConfiguration _confifuraton;
-		public RoleManagementController(
-			IServiceProvider serviceProvider,
-			 IConfiguration confifuraton,
-			 MTDMOContext context)
-		{
-			_identityRoleService = new IdentityRoleService(serviceProvider,context);
-		}
+        private IdentityRoleService _identityRoleService;
+        private IConfiguration _confifuraton;
+        public RoleManagementController(
+            IServiceProvider serviceProvider,
+             IConfiguration confifuraton,
+             MTDMOContext context)
+        {
+            _identityRoleService = new IdentityRoleService(serviceProvider, context);
+        }
 
-		[HttpPost]
-		[Route("createRole")]
-		public async Task<IActionResult> CreateRoleAsync(CreateRoleDetails roleDetails)
-		{
-			return Ok(await _identityRoleService.CreateRolesAsync(roleDetails));
-		}
+        [HttpPost]
+        [Route("createRole")]
+        public async Task<IActionResult> CreateRoleAsync(CreateRoleDetails roleDetails)
+        {
+            return Ok(await _identityRoleService.CreateRolesAsync(roleDetails));
+        }
 
-		[HttpPost]
-		[Route("getRole")]
-		public async Task<IActionResult> GetRoles()
-		{
-			string userId = string.Empty;
-			if (Request.Headers.ContainsKey("userId"))
-			{
-				userId = Request.Headers.Single(x => x.Key == "userId").Value;
-			}
-			return Ok(await _identityRoleService.GetRoleAsync(userId));
+        [HttpGet]
+        [Route("getRole/{userId}")]
+        public async Task<IActionResult> GetRoles(Guid userId)
+        {
+            
+            return Ok(await _identityRoleService.GetRolesAsync(userId));
 
-		}
-	}
+        }
+    }
 }

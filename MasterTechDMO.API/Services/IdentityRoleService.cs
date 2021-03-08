@@ -12,9 +12,9 @@ namespace MasterTechDMO.API.Services
     public class IdentityRoleService
     {
         private IIdentityRoleManagementRepo _identityRoleManagementRepo;
-        public IdentityRoleService(IServiceProvider serviceProvider,MTDMOContext context)
+        public IdentityRoleService(IServiceProvider serviceProvider, MTDMOContext context)
         {
-            _identityRoleManagementRepo = new IdentityRoleManagementRepo(serviceProvider,context);
+            _identityRoleManagementRepo = new IdentityRoleManagementRepo(serviceProvider, context);
         }
 
         public async Task<APICallResponse<bool>> CreateRolesAsync(CreateRoleDetails roleDetails)
@@ -31,6 +31,7 @@ namespace MasterTechDMO.API.Services
                     callResponse.IsSuccess = resp.Key;
                     callResponse.Respose = resp.Key;
                 }
+                callResponse.Status = "Success";
             }
 
             return callResponse;
@@ -62,9 +63,22 @@ namespace MasterTechDMO.API.Services
             return await _identityRoleManagementRepo.AssignRoleToUserAsync(userId, roleType);
         }
 
-        public async Task<APICallResponse<bool>> GetRoleAsync(string userId)
+        public async Task<APICallResponse<List<DMOOrgRoles>>> GetRolesAsync(Guid userId)
         {
-            return await _identityRoleManagementRepo.GetRoleAsync(userId);
+            var userInRoleResponse = await _identityRoleManagementRepo.CheckUserInRole(userId);
+            if (userInRoleResponse.IsSuccess && userInRoleResponse.Status == "Success")
+            {
+                return await _identityRoleManagementRepo.GetRolesAsync(userId);
+            }
+            else
+            {
+                return new APICallResponse<List<DMOOrgRoles>> { 
+                    IsSuccess = userInRoleResponse.IsSuccess,
+                    Message = userInRoleResponse.Message,
+                    Respose = null,
+                    Status = userInRoleResponse.Status
+                };
+            }
         }
 
     }

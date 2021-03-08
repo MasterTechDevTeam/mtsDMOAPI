@@ -12,6 +12,7 @@ namespace MasterTechDMO.API.Models
             public const string Org = "Organization";
             public const string OrgUser = "OrganizationUser";
             public const string Indevidual = "SingleUser";
+            public const string MTAdmin = "MTAdmin";
         }
     }
 }
