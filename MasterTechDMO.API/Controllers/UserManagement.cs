@@ -23,8 +23,6 @@ namespace MasterTechDMO.API.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserManagement : ControllerBase
     {
-        //private readonly SignInManager<DMOUsers> _signInManager;
-        //private readonly UserManager<DMOUsers> _userManager;
 
         private UserManagementServices _userManagementServices;
         private IdentityRoleService _identityRoleService;
@@ -36,7 +34,7 @@ namespace MasterTechDMO.API.Controllers
              MTDMOContext context)
         {
             _identityRoleService = new IdentityRoleService(serviceProvider, context);
-            _userManagementServices = new UserManagementServices(userManager, signInManager, confifuraton);
+            _userManagementServices = new UserManagementServices(userManager, signInManager, confifuraton, serviceProvider, context);
         }
 
 
@@ -100,6 +98,13 @@ namespace MasterTechDMO.API.Controllers
         public async Task<IActionResult> GetUserByEmailAsync(string EmailId)
         {
             return Ok(await _userManagementServices.GetUserByEmailAsync(EmailId));
+        }
+
+        [HttpGet]
+        [Route("getUsers/{userId}")]
+        public async Task<IActionResult> GetUsers(Guid userId)
+        {
+            return Ok(await _userManagementServices.GetUsersAsync(userId));
         }
 
 

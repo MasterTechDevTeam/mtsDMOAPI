@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MasterTechDMO.API.Helpers;
 
 namespace MasterTechDMO.API.Repos
 {
@@ -102,14 +103,15 @@ namespace MasterTechDMO.API.Repos
         {
             try
             {
+
                 var lstOrgRoles = new APICallResponse<List<DMOOrgRoles>>();
-                if (orgId != null && IsOrgUser(orgId))
-                {
+                if (orgId != null && RepoHelpers.IsOrgUser(orgId,_context))
+                {   
                     lstOrgRoles.Respose = _context.DMOOrgRoles.Where(x => x.OrgId == orgId).ToList();
                     lstOrgRoles.Message = new List<string> { $"{lstOrgRoles.Respose.Count} roles founds." };
                     lstOrgRoles.Status = "Success";
                 }
-                else if (orgId != null && IsMTAdmin(orgId))
+                else if (orgId != null && RepoHelpers.IsMTAdmin(orgId,_context))
                 {
                     lstOrgRoles.Respose = _context.DMOOrgRoles.ToList();
                     lstOrgRoles.Message = new List<string> { $"{lstOrgRoles.Respose.Count} roles founds." };
@@ -223,61 +225,7 @@ namespace MasterTechDMO.API.Repos
             }
         }
 
-        private bool IsOrgUser(Guid orgId)
-        {
-            try
-            {
-                var orgUserData = _context.Users.Where(x => x.Id == orgId.ToString() && x.IsOrg == true).FirstOrDefault();
-                if (orgUserData != null)
-                {
-                    var userInRole = _context.UserRoles.Where(x => x.UserId == orgId.ToString()).FirstOrDefault();
-                    if (userInRole != null)
-                    {
-                        var roleDetails = _context.Roles.Where(x => x.Id == userInRole.RoleId).FirstOrDefault();
-                        if (roleDetails.Name == Constants.BaseRole.Org)
-                        {
-                            return true;
-                        }
-                        return false;
-                    }
-                    return false;
-                }
-                else
-                    return false;
-            }
-            catch (Exception Ex)
-            {
-                return false;
-            }
-        }
-
-        private bool IsMTAdmin(Guid userId)
-        {
-            try
-            {
-                var userData = _context.Users.Where(x => x.Id == userId.ToString()).FirstOrDefault();
-                if (userData != null)
-                {
-                    var userInRole = _context.UserRoles.Where(x => x.UserId == userId.ToString()).FirstOrDefault();
-                    if (userInRole != null)
-                    {
-                        var roleDetails = _context.Roles.Where(x => x.Id == userInRole.RoleId).FirstOrDefault();
-                        if (roleDetails.Name == Constants.BaseRole.MTAdmin)
-                        {
-                            return true;
-                        }
-                        return false;
-                    }
-                    return false;
-                }
-                else
-                    return false;
-            }
-            catch (Exception Ex)
-            {
-                return false;
-            }
-        }
+       
         #endregion
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MasterTechDMO.API.Areas.Identity.Data;
+using MasterTechDMO.API.Helpers;
 using MasterTechDMO.API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
@@ -16,9 +17,11 @@ namespace MasterTechDMO.API.Repos
     {
         private UserManager<DMOUsers> _userManager;
         private SignInManager<DMOUsers> _signInManager;
+        private MTDMOContext _context;
 
-        public UserManagementRepo(UserManager<DMOUsers> userManager, SignInManager<DMOUsers> signInManager)
+        public UserManagementRepo(UserManager<DMOUsers> userManager, SignInManager<DMOUsers> signInManager,MTDMOContext context)
         {
+            _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
         }
@@ -186,6 +189,45 @@ namespace MasterTechDMO.API.Repos
             {
 
                 return new APICallResponse<DMOUsers>
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message },
+                    Status = "Error",
+                    Respose = null
+                };
+            }
+        }
+
+        public async Task<APICallResponse<List<DMOUsers>>> GetUsersAsync(Guid orgId)
+        {
+            try
+            {
+                var lstOrgUsers = new APICallResponse<List<DMOUsers>>();
+                if (orgId != null && RepoHelpers.IsOrgUser(orgId,_context))
+                {
+                    lstOrgUsers.Respose = _context.Users.Where(x => x.OrgId == orgId).ToList();
+                    lstOrgUsers.Message = new List<string> { $"{lstOrgUsers.Respose.Count} users founds." };
+                    lstOrgUsers.Status = "Success";
+                }
+                else if (orgId != null && RepoHelpers.IsMTAdmin(orgId,_context))
+                {
+                    lstOrgUsers.Respose = _context.Users.ToList();
+                    lstOrgUsers.Message = new List<string> { $"{lstOrgUsers.Respose.Count} users founds." };
+                    lstOrgUsers.Status = "Success";
+                }
+                else
+                {
+                    lstOrgUsers.Respose = null;
+                    lstOrgUsers.Message = new List<string> { "Either user not found or user is missing permission." };
+                    lstOrgUsers.Status = "Warning";
+                }
+
+                lstOrgUsers.IsSuccess = true;
+                return lstOrgUsers;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<List<DMOUsers>>
                 {
                     IsSuccess = false,
                     Message = new List<string>() { Ex.Message },

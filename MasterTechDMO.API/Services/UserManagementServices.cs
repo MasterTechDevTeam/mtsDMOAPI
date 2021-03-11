@@ -20,10 +20,17 @@ namespace MasterTechDMO.API.Services
     {
         private IUserManagementRepo _userManagementRepo;
         public IConfiguration _configuration;
-        public UserManagementServices(UserManager<DMOUsers> userManager, SignInManager<DMOUsers> signInManager, IConfiguration configuration)
+        private IIdentityRoleManagementRepo _identityRoleManagementRepo;
+        public UserManagementServices(UserManager<DMOUsers> userManager,
+            SignInManager<DMOUsers> signInManager,
+            IConfiguration configuration,
+             IServiceProvider serviceProvider,
+              MTDMOContext context)
         {
-            _userManagementRepo = new UserManagementRepo(userManager, signInManager);
+            _userManagementRepo = new UserManagementRepo(userManager, signInManager, context);
             _configuration = configuration;
+            _identityRoleManagementRepo = new IdentityRoleManagementRepo(serviceProvider, context);
+
         }
 
         public async Task<APICallResponse<string>> RegisterUserAsync(UserRegistration user, string returnURL)
@@ -241,6 +248,59 @@ namespace MasterTechDMO.API.Services
                     Message = new List<string>() { Ex.InnerException.ToString() },
                     Status = "Error",
                     Respose = null
+                };
+            }
+        }
+
+        public async Task<APICallResponse<List<UserDetails>>> GetUsersAsync(Guid userId)
+        {
+            var callReponse = new APICallResponse<List<UserDetails>>();
+
+            var userInRoleResponse = await _identityRoleManagementRepo.CheckUserInRole(userId);
+            if (userInRoleResponse.IsSuccess && userInRoleResponse.Status == "Success")
+            {
+                var lstOrgUsers = await _userManagementRepo.GetUsersAsync(userId);
+                if (lstOrgUsers != null)
+                {
+                    List<UserDetails> lstUsers = new List<UserDetails>();
+                    foreach (var user in lstOrgUsers.Respose)
+                    {
+                        lstUsers.Add(
+                            new UserDetails {
+                                Address = user.Address,
+                                City = user.City,
+                                ContactNo = user.ContactNo,
+                                Country = user.Country,
+                                DateofBirth = user.DateofBirth,
+                                EmailId = user.Email,
+                                FirstName = user.FirstName,
+                                LastName = user.LastName,
+                                State = user.State,
+                                UserId = Guid.Parse(user.Id),
+                                Zipcode = user.Zipcode,
+                            });
+                    }
+                    callReponse.Respose = lstUsers;
+                    callReponse.IsSuccess = true;
+                    callReponse.Message = lstOrgUsers.Message;
+                    callReponse.Status = "Success";
+                    return callReponse;
+                }
+
+                callReponse.Respose = null;
+                callReponse.IsSuccess = lstOrgUsers.IsSuccess;
+                callReponse.Message = lstOrgUsers.Message;
+                callReponse.Status = "Warning";
+                return callReponse;
+            }
+            else
+            {
+                return new APICallResponse<List<UserDetails>>
+                {
+                    IsSuccess = userInRoleResponse.IsSuccess,
+                    Message = userInRoleResponse.Message,
+                    Respose = null,
+                    Status = userInRoleResponse.Status
                 };
             }
         }
