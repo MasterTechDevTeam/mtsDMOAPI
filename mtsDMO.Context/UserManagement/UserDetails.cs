@@ -13,7 +13,6 @@ namespace mtsDMO.Context.UserManagement
         [DataType(DataType.EmailAddress)]
         public string EmailId { get; set; }
 
-
         [Required]
         public string FirstName { get; set; }
 
@@ -43,5 +42,7 @@ namespace mtsDMO.Context.UserManagement
 
         [Required]
         public string Country { get; set; }
+
+        public string AssignedRole { get; set; }
     }
 }

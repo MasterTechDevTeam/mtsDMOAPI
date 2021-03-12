@@ -8,12 +8,14 @@ namespace MasterTechDMO.API.Repos
 {
     public interface IIdentityRoleManagementRepo
     {
-        Task<KeyValuePair<bool, string>> CreateRolesAsync(Guid orgId,string roleName);
-        Task<APICallResponse<bool>> AssignRoleToUserAsync(string userId, string roleName);
+        Task<KeyValuePair<bool, string>> CreateRolesAsync(Guid orgId, string roleName);
+        Task<APICallResponse<bool>> AssignRoleToUserAsync(string userId, string roleName, string roleId = "");
         Task<APICallResponse<List<DMOOrgRoles>>> GetRolesAsync(Guid orgId);
 
         Task<APICallResponse<bool>> CheckUserInRole(Guid id);
 
         Task<KeyValuePair<bool, string>> CreateBaseRoleAsync(string roleName);
+
+        Task<APICallResponse<string>> GetAssignedRole(Guid userId);
     }
 }

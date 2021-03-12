@@ -102,9 +102,16 @@ namespace MasterTechDMO.API.Controllers
 
         [HttpGet]
         [Route("getUsers/{userId}")]
-        public async Task<IActionResult> GetUsers(Guid userId)
+        public async Task<IActionResult> GetUsersAsync(Guid userId)
         {
             return Ok(await _userManagementServices.GetUsersAsync(userId));
+        }
+
+        [HttpPost]
+        [Route("updateUserDetails")]
+        public async Task<IActionResult> UpdateUserDetailsAsync(UserDetails userDetails)
+        {
+            return Ok(await _userManagementServices.UpdateUserDetailsAsync(userDetails));
         }
 
 

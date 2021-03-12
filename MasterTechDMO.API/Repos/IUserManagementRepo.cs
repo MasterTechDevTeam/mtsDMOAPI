@@ -14,8 +14,11 @@ namespace MasterTechDMO.API.Repos
         Task<APICallResponse<bool>> VerifyUserAsync(string emailId, string code);
 
         Task<APICallResponse<IList<string>>> LoginUserAsync(UserLogin user);
+
         Task<APICallResponse<DMOUsers>> GetUserByEmailAsync(string EmailId);
 
         Task<APICallResponse<List<DMOUsers>>> GetUsersAsync(Guid orgId);
+
+        Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserDetails userDetails);
     }
 }

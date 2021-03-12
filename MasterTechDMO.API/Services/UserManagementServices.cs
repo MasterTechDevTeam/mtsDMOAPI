@@ -219,6 +219,14 @@ namespace MasterTechDMO.API.Services
                     else
                         userType = Constants.BaseRole.Indevidual;
 
+                    string assignedRole = string.Empty;
+
+                    var roleResult = await _identityRoleManagementRepo.GetAssignedRole(Guid.Parse(result.Respose.Id));
+                    if (roleResult.IsSuccess && roleResult.Status == "Success")
+                    {
+                        assignedRole = roleResult.Respose;
+                    }
+
                     UserDetails userDetails = new UserDetails
                     {
                         UserId = Guid.Parse(result.Respose.Id),
@@ -232,7 +240,8 @@ namespace MasterTechDMO.API.Services
                         Country = result.Respose.Country,
                         DateofBirth = result.Respose.DateofBirth,
                         State = result.Respose.State,
-                        Zipcode = result.Respose.Zipcode
+                        Zipcode = result.Respose.Zipcode,
+                        AssignedRole = assignedRole
                     };
 
                     data.Respose = userDetails;
@@ -265,8 +274,26 @@ namespace MasterTechDMO.API.Services
                     List<UserDetails> lstUsers = new List<UserDetails>();
                     foreach (var user in lstOrgUsers.Respose)
                     {
+                        string assignedRole = string.Empty;
+                        string userType = string.Empty;
+
+                        var result = await _identityRoleManagementRepo.GetAssignedRole(Guid.Parse(user.Id));
+
+                        if (result.IsSuccess && result.Status == "Success")
+                        {
+                            assignedRole = result.Respose;
+                        }
+
+                        if (user.IsOrg)
+                            userType = Constants.BaseRole.Org;
+                        else if (user.OrgId != null)
+                            userType = Constants.BaseRole.OrgUser;
+                        else
+                            userType = Constants.BaseRole.Indevidual;
+
                         lstUsers.Add(
-                            new UserDetails {
+                            new UserDetails
+                            {
                                 Address = user.Address,
                                 City = user.City,
                                 ContactNo = user.ContactNo,
@@ -278,6 +305,8 @@ namespace MasterTechDMO.API.Services
                                 State = user.State,
                                 UserId = Guid.Parse(user.Id),
                                 Zipcode = user.Zipcode,
+                                AssignedRole = assignedRole,
+                                UserType = userType
                             });
                     }
                     callReponse.Respose = lstUsers;
@@ -303,6 +332,22 @@ namespace MasterTechDMO.API.Services
                     Status = userInRoleResponse.Status
                 };
             }
+        }
+
+        public async Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserDetails userDetails)
+        {
+            var callResponse = await _userManagementRepo.UpdateUserDetailsAsync(userDetails);
+
+            if (userDetails.AssignedRole != "")
+            {
+                var roleCallResponse = await _identityRoleManagementRepo.AssignRoleToUserAsync(userDetails.UserId.ToString(), "", userDetails.AssignedRole);
+                callResponse.IsSuccess = roleCallResponse.IsSuccess;
+                callResponse.Status = roleCallResponse.Status;
+                callResponse.Message.AddRange(roleCallResponse.Message);
+            }
+
+            return callResponse;
+
         }
     }
 }

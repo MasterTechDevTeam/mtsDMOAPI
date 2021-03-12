@@ -19,7 +19,7 @@ namespace MasterTechDMO.API.Repos
         private SignInManager<DMOUsers> _signInManager;
         private MTDMOContext _context;
 
-        public UserManagementRepo(UserManager<DMOUsers> userManager, SignInManager<DMOUsers> signInManager,MTDMOContext context)
+        public UserManagementRepo(UserManager<DMOUsers> userManager, SignInManager<DMOUsers> signInManager, MTDMOContext context)
         {
             _context = context;
             _userManager = userManager;
@@ -203,13 +203,13 @@ namespace MasterTechDMO.API.Repos
             try
             {
                 var lstOrgUsers = new APICallResponse<List<DMOUsers>>();
-                if (orgId != null && RepoHelpers.IsOrgUser(orgId,_context))
+                if (orgId != null && RepoHelpers.IsOrgUser(orgId, _context))
                 {
                     lstOrgUsers.Respose = _context.Users.Where(x => x.OrgId == orgId).ToList();
                     lstOrgUsers.Message = new List<string> { $"{lstOrgUsers.Respose.Count} users founds." };
                     lstOrgUsers.Status = "Success";
                 }
-                else if (orgId != null && RepoHelpers.IsMTAdmin(orgId,_context))
+                else if (orgId != null && RepoHelpers.IsMTAdmin(orgId, _context))
                 {
                     lstOrgUsers.Respose = _context.Users.ToList();
                     lstOrgUsers.Message = new List<string> { $"{lstOrgUsers.Respose.Count} users founds." };
@@ -235,6 +235,43 @@ namespace MasterTechDMO.API.Repos
                     Respose = null
                 };
             }
+        }
+
+        public async Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserDetails userDetails)
+        {
+            try
+            {
+                var callResponse = new APICallResponse<bool>();
+                var dbUserDetails = _context.Users.Where(x => x.Id == userDetails.UserId.ToString()).FirstOrDefault();
+                if (dbUserDetails != null)
+                {
+                    dbUserDetails.FirstName = userDetails.FirstName;
+                    dbUserDetails.LastName = userDetails.LastName;
+                    dbUserDetails.ContactNo = userDetails.ContactNo;
+                    dbUserDetails.Address = userDetails.Address;
+                    dbUserDetails.Zipcode = userDetails.Zipcode;
+                    dbUserDetails.State = userDetails.State;
+                    dbUserDetails.Country = userDetails.Country;
+                    dbUserDetails.City = userDetails.City;
+                }
+                _context.SaveChanges();
+                callResponse.IsSuccess = true;
+                callResponse.Respose = true;
+                callResponse.Status = "Success";
+                callResponse.Message = new List<string> { $"User {dbUserDetails.UserName} is update successfully" };
+                return callResponse;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<bool>()
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.InnerException.ToString() },
+                    Status = "Error",
+                    Respose = false
+                };
+            }
+          
         }
     }
 }

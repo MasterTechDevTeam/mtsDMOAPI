@@ -50,10 +50,16 @@ namespace MasterTechDMO.API.Repos
             }
         }
 
-        public async Task<APICallResponse<bool>> AssignRoleToUserAsync(string userId, string roleName)
+        public async Task<APICallResponse<bool>> AssignRoleToUserAsync(string userId, string roleName, string roleId = "")
         {
             var roleManager = _serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = _serviceProvider.GetRequiredService<UserManager<DMOUsers>>();
+
+            if (roleId != "")
+            {
+                var roleData = await roleManager.FindByIdAsync(roleId.ToString());
+                roleName = roleData.Name;
+            }
 
             bool isRoleExists = await roleManager.RoleExistsAsync(roleName);
             if (!isRoleExists)
@@ -105,13 +111,13 @@ namespace MasterTechDMO.API.Repos
             {
 
                 var lstOrgRoles = new APICallResponse<List<DMOOrgRoles>>();
-                if (orgId != null && RepoHelpers.IsOrgUser(orgId,_context))
-                {   
+                if (orgId != null && RepoHelpers.IsOrgUser(orgId, _context))
+                {
                     lstOrgRoles.Respose = _context.DMOOrgRoles.Where(x => x.OrgId == orgId).ToList();
                     lstOrgRoles.Message = new List<string> { $"{lstOrgRoles.Respose.Count} roles founds." };
                     lstOrgRoles.Status = "Success";
                 }
-                else if (orgId != null && RepoHelpers.IsMTAdmin(orgId,_context))
+                else if (orgId != null && RepoHelpers.IsMTAdmin(orgId, _context))
                 {
                     lstOrgRoles.Respose = _context.DMOOrgRoles.ToList();
                     lstOrgRoles.Message = new List<string> { $"{lstOrgRoles.Respose.Count} roles founds." };
@@ -199,6 +205,41 @@ namespace MasterTechDMO.API.Repos
             }
         }
 
+        public async Task<APICallResponse<string>> GetAssignedRole(Guid userId)
+        {
+            try
+            {
+                var callResponse = new APICallResponse<string>();
+
+                var userInRole = _context.UserRoles.Where(x => x.UserId == userId.ToString()).FirstOrDefault();
+                if (userInRole != null)
+                {
+                    var roleDetails = _context.Roles.Where(x => x.Id == userInRole.RoleId).FirstOrDefault();
+                    callResponse.Respose = roleDetails.Name;
+                    callResponse.Message = new List<string> { $"user {userId} found with {roleDetails.Name} role" };
+                    callResponse.Status = "Success";
+                }
+                else
+                {
+                    callResponse.Respose = string.Empty;
+                    callResponse.Message = new List<string> { "User not found." };
+                    callResponse.Status = "Warning";
+                }
+                callResponse.IsSuccess = true;
+                return callResponse;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<string>
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message },
+                    Status = "Error",
+                    Respose = string.Empty
+                };
+            }
+        }
+
         #region Helper Methods
         private bool MapOrgWithRole(Guid orgId, string roleName)
         {
@@ -225,7 +266,7 @@ namespace MasterTechDMO.API.Repos
             }
         }
 
-       
+
         #endregion
     }
 }
