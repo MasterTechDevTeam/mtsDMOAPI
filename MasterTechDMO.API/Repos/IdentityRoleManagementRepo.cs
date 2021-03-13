@@ -79,7 +79,8 @@ namespace MasterTechDMO.API.Repos
                     {
                         IsSuccess = true,
                         Message = new List<string>() { string.Format($"{roleName} assigned to {userId} user") },
-                        Respose = true
+                        Respose = true,
+                        Status = "Success"
                     };
                 }
                 else
