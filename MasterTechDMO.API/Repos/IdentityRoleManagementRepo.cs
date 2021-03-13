@@ -50,12 +50,12 @@ namespace MasterTechDMO.API.Repos
             }
         }
 
-        public async Task<APICallResponse<bool>> AssignRoleToUserAsync(string userId, string roleName, string roleId = "")
+        public async Task<APICallResponse<bool>> AssignRoleToUserAsync(string userId, string roleName, string roleId = null)
         {
             var roleManager = _serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = _serviceProvider.GetRequiredService<UserManager<DMOUsers>>();
 
-            if (roleId != "")
+            if (!string.IsNullOrEmpty(roleId))
             {
                 var roleData = await roleManager.FindByIdAsync(roleId.ToString());
                 roleName = roleData.Name;

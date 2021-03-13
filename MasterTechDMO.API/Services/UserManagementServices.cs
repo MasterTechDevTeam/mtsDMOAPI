@@ -338,7 +338,7 @@ namespace MasterTechDMO.API.Services
         {
             var callResponse = await _userManagementRepo.UpdateUserDetailsAsync(userDetails);
 
-            if (userDetails.AssignedRole != "")
+            if (!string.IsNullOrEmpty(userDetails.AssignedRole))
             {
                 var roleCallResponse = await _identityRoleManagementRepo.AssignRoleToUserAsync(userDetails.UserId.ToString(), "", userDetails.AssignedRole);
                 callResponse.IsSuccess = roleCallResponse.IsSuccess;
