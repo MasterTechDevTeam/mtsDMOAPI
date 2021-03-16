@@ -241,6 +241,122 @@ namespace MasterTechDMO.API.Repos
             }
         }
 
+        public async Task<APICallResponse<bool>> RemoveRoleFromUserAsync(Guid userId)
+        {
+            try
+            {
+                var callResponse = new APICallResponse<bool>();
+
+                var userInRoles = _context.UserRoles.Where(x => x.UserId == userId.ToString()).ToList();
+                if (userInRoles != null)
+                {
+                    _context.UserRoles.RemoveRange(userInRoles);
+                    await _context.SaveChangesAsync();
+                    callResponse.Respose = true;
+                }
+                else
+                {
+                    callResponse.Respose = false;
+                    callResponse.Message = new List<string> { "User not found." };
+                    callResponse.Status = "Warning";
+                }
+                callResponse.IsSuccess = true;
+                return callResponse;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message },
+                    Status = "Error",
+                    Respose = false
+                };
+            }
+        }
+
+        public async Task<APICallResponse<DMOOrgRoles>> FindRoleByIdAsync(Guid roleId)
+        {
+            try
+            {
+                var dbOrgRole = _context.DMOOrgRoles.Where(x => x.RoleId == roleId).FirstOrDefault();
+                if (dbOrgRole != null)
+                {
+                    return new APICallResponse<DMOOrgRoles>
+                    {
+                        IsSuccess = true,
+                        Message = new List<string> { "Role Found." },
+                        Respose = dbOrgRole,
+                        Status = "Success"
+                    };
+                }
+                else
+                {
+                    return new APICallResponse<DMOOrgRoles>
+                    {
+                        IsSuccess = true,
+                        Message = new List<string> { "Role not found." },
+                        Respose = null,
+                        Status = "Warning"
+                    };
+                }
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<DMOOrgRoles>
+                {
+                    IsSuccess = false,
+                    Message = new List<string> { Ex.Message },
+                    Respose = null,
+                    Status = "Error"
+                };
+            }
+
+        }
+
+
+        public async Task<APICallResponse<bool>> UpdateRoleByIdAsync(DMOOrgRoles orgRole)
+        {
+            try
+            {
+                var dbRole = _context.DMOOrgRoles.Where(x => x.RoleId == orgRole.RoleId).FirstOrDefault();
+                if (dbRole != null)
+                {
+                    dbRole.DisplayName = orgRole.DisplayName;
+                    _context.SaveChanges();
+
+                    return new APICallResponse<bool>
+                    {
+                        IsSuccess = true,
+                        Message = new List<string> { "Role update successfully." },
+                        Respose = true,
+                        Status = "Success"
+                    };
+                }
+                else
+                {
+                    return new APICallResponse<bool>
+                    {
+                        IsSuccess = true,
+                        Message = new List<string> { "Role not found." },
+                        Respose = false,
+                        Status = "Warning"
+                    };
+                }
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = new List<string> { Ex.Message },
+                    Respose = false,
+                    Status = "Error"
+                };
+            }
+           
+        }
+
         #region Helper Methods
         private bool MapOrgWithRole(Guid orgId, string roleName)
         {
@@ -266,8 +382,6 @@ namespace MasterTechDMO.API.Repos
                 return false;
             }
         }
-
-
         #endregion
     }
 }

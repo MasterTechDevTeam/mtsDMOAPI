@@ -34,7 +34,7 @@ namespace MasterTechDMO.API.Repos
                 var tokenCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
                 //tokenCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
-                tokenCode = HttpUtility.UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
+                tokenCode = HttpUtility.UrlEncode(tokenCode, Encoding.UTF8);
 
                 return new APICallResponse<string>
                 {
@@ -271,7 +271,99 @@ namespace MasterTechDMO.API.Repos
                     Respose = false
                 };
             }
-          
+
+        }
+
+        public async Task<APICallResponse<string>> GenerateForgetPasswordTokenAsync(string EmailId)
+        {
+            try
+            {
+                var callResponse = new APICallResponse<string>();
+                var dbUser = await _userManager.FindByNameAsync(EmailId);
+                if (dbUser != null)
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(dbUser);
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        token = HttpUtility.UrlEncode(token, Encoding.UTF8);
+                        callResponse.Respose = token;
+                        callResponse.Status = "Success";
+                        callResponse.Message = new List<string> { "Token generated successfully." };
+                    }
+                    else
+                    {
+                        callResponse.Respose = string.Empty;
+                        callResponse.Status = "Warning";
+                        callResponse.Message = new List<string> { "Failed to generate token." };
+                    }
+                }
+                else
+                {
+                    callResponse.Respose = string.Empty;
+                    callResponse.Status = "Warning";
+                    callResponse.Message = new List<string> { "User not found." };
+                }
+                callResponse.IsSuccess = true;
+                return callResponse;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<string>()
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.InnerException.ToString() },
+                    Status = "Error",
+                    Respose = "Oops! Something went wrong"
+                };
+            }
+        }
+
+        public async Task<APICallResponse<bool>> ResetPasswordAsync(ForgotPasswordModel forgotPasswordModel)
+        {
+            try
+            {
+                var callResponse = new APICallResponse<bool>();
+
+                var dbUser = _signInManager.UserManager.FindByEmailAsync(forgotPasswordModel.EmailId).Result;
+
+                if (dbUser != null)
+                {
+                    var changePasswordResult = await _userManager.ResetPasswordAsync(dbUser, forgotPasswordModel.Code, forgotPasswordModel.Password);
+                    if (changePasswordResult.Succeeded)
+                    {
+                        callResponse.IsSuccess = true;
+                        callResponse.Respose = true;
+                        callResponse.Message = new List<string> { "Password Chaanged successfully." };
+                        callResponse.Status = "Success";
+                    }
+                    else
+                    {
+                        callResponse.IsSuccess = true;
+                        callResponse.Status = "Warning";
+                        callResponse.Respose = false;
+                        callResponse.Message = new List<string> { "Oops, Something went wrong. Try again." };
+                    }
+                }
+                else
+                {
+                    callResponse.IsSuccess = true;
+                    callResponse.Respose = false;
+                    callResponse.Message = new List<string> { "User not found." };
+                    callResponse.Status = "Warning";
+                }
+
+                return callResponse;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<bool>()
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.InnerException.ToString() },
+                    Status = "Error",
+                    Respose = false
+                };
+            }
         }
     }
 }

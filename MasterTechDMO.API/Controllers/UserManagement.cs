@@ -55,7 +55,7 @@ namespace MasterTechDMO.API.Controllers
                 if (userRegisterReponse.IsSuccess && userRegisterReponse.Status == "Success")
                 {
                     if (user.UserType == Constants.BaseRole.Org)
-                        await _identityRoleService.AssignRoleToUserAsync(user.UserId.ToString(),Constants.BaseRole.Org);
+                        await _identityRoleService.AssignRoleToUserAsync(user.UserId.ToString(), Constants.BaseRole.Org);
                 }
                 return Ok(userRegisterReponse);
             }
@@ -113,6 +113,34 @@ namespace MasterTechDMO.API.Controllers
         {
             return Ok(await _userManagementServices.UpdateUserDetailsAsync(userDetails));
         }
+
+        [HttpGet]
+        [Route("sendResetPasswordMail/{EmailId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendResetPasswordMailAsync(string EmailId)
+        {
+            string returnURL = string.Empty;
+            if (Request.Headers.ContainsKey("returnUrl"))
+            {
+                returnURL = Request.Headers.Single(x => x.Key == "returnUrl").Value;
+            }
+            return Ok(await _userManagementServices.GetResetPasswordTokenAsync(returnURL, EmailId));
+        }
+
+        [HttpPost]
+        [Route("resetPasword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPasswordAsync(ForgotPasswordModel forgotPasswordModel)
+        {
+            //string returnURL = string.Empty;
+            //if (Request.Headers.ContainsKey("returnUrl"))
+            //{
+            //    returnURL = Request.Headers.Single(x => x.Key == "returnUrl").Value;
+            //}
+            return Ok(await _userManagementServices.ResetPasswordAsync(forgotPasswordModel));
+        }
+
+
 
 
     }

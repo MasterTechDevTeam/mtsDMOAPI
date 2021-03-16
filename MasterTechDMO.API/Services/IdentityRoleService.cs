@@ -37,7 +37,6 @@ namespace MasterTechDMO.API.Services
             return callResponse;
         }
 
-
         public async Task<APICallResponse<bool>> CreateBaseRolesAsync(string[] roles)
         {
             var callResponse = new APICallResponse<bool>();
@@ -55,8 +54,6 @@ namespace MasterTechDMO.API.Services
 
             return callResponse;
         }
-
-
 
         public async Task<APICallResponse<bool>> AssignRoleToUserAsync(string userId, string roleType)
         {
@@ -81,5 +78,14 @@ namespace MasterTechDMO.API.Services
             }
         }
 
+        public async Task<APICallResponse<DMOOrgRoles>> FindRoleByIdAsync(Guid roleId)
+        {
+            return await _identityRoleManagementRepo.FindRoleByIdAsync(roleId);
+        }
+
+        public async Task<APICallResponse<bool>> UpdateRoleByIdAsync(DMOOrgRoles orgRole)
+        {
+            return await _identityRoleManagementRepo.UpdateRoleByIdAsync(orgRole);
+        }
     }
 }

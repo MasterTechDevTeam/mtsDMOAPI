@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -91,7 +92,7 @@ namespace MasterTechDMO.API.Services
         {
             if (code != string.Empty)
             {
-                code = HttpUtility.UrlDecode(code);
+                code = HttpUtility.UrlDecode(code, Encoding.UTF8);
                 code = code.Replace(' ', '+');
                 var callResponse = await _userManagementRepo.VerifyUserAsync(emailId, code);
                 return callResponse;
@@ -105,20 +106,13 @@ namespace MasterTechDMO.API.Services
                 Respose = false
             };
         }
+
         public bool SendUserVerificationMail(string verificationLink, string username, string ToEmail, string UserType)
         {
             try
             {
-                SMTPSettings smtpSettings = new SMTPSettings();
+                var smtpClient = GetSMTPSettings();
 
-                _configuration.GetSection("SMTPSettings").Bind(smtpSettings);
-
-                var smtpClient = new SmtpClient(smtpSettings.SMTP)
-                {
-                    Port = smtpSettings.Port,
-                    Credentials = new NetworkCredential(smtpSettings.Username, smtpSettings.Password),
-                    EnableSsl = smtpSettings.EnableSsl,
-                };
                 string strMailBody = string.Empty;
                 if (UserType == "OrganizationUser")
                 {
@@ -136,22 +130,11 @@ namespace MasterTechDMO.API.Services
                 }
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(smtpSettings.Username),
+                    From = new MailAddress("sandboxmail@mastertechsolution.com"),
                     Subject = "Registration Confirmation",
                     Body = strMailBody,
                     IsBodyHtml = true,
                 };
-
-                //var mailMessage = new MailMessage
-                //{
-                //	From = new MailAddress(smtpSettings.Username),
-                //	Subject = "Registration Confirmation",
-                //	Body = string.Format($"Hello {username}, " +
-                //			$"<br/> Thank you for registration. Please kindly click the button below to verify your account." +
-                //			$"<a href='{verificationLink}'> Verify Account </a>" +
-                //			$"<br/>Thank You.<br/>"),
-                //	IsBodyHtml = true,
-                //};
 
                 mailMessage.To.Add(ToEmail);
 
@@ -340,6 +323,7 @@ namespace MasterTechDMO.API.Services
 
             if (!string.IsNullOrEmpty(userDetails.AssignedRole))
             {
+                await _identityRoleManagementRepo.RemoveRoleFromUserAsync(userDetails.UserId);
                 var roleCallResponse = await _identityRoleManagementRepo.AssignRoleToUserAsync(userDetails.UserId.ToString(), "", userDetails.AssignedRole);
                 callResponse.IsSuccess = roleCallResponse.IsSuccess;
                 callResponse.Status = roleCallResponse.Status;
@@ -349,5 +333,83 @@ namespace MasterTechDMO.API.Services
             return callResponse;
 
         }
+
+        public async Task<APICallResponse<string>> GetResetPasswordTokenAsync(string returnUrl, string emailId)
+        {
+            try
+            {
+                var tokenCallResponse = await _userManagementRepo.GenerateForgetPasswordTokenAsync(emailId);
+                if (!string.IsNullOrEmpty(tokenCallResponse.Respose))
+                {
+                    returnUrl = HttpUtility.UrlDecode(returnUrl,Encoding.UTF8);
+                    returnUrl = returnUrl.Replace("<% CODE %>", tokenCallResponse.Respose);
+                    SendResetPasswordMail(returnUrl, emailId);
+                }
+                return tokenCallResponse;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<string>()
+                {
+                    IsSuccess = false,
+                    Message = new List<string> { Ex.Message },
+                    Status = "Error",
+                    Respose = "Oops! something went wrong."
+                };
+            }
+        }
+
+        public bool SendResetPasswordMail(string verificationLink, string ToEmail)
+        {
+            try
+            {
+                var smtpClient = GetSMTPSettings();
+
+                string strMailBody = string.Empty;
+                strMailBody = string.Format($"Hello {ToEmail}, " +
+                        $"<br/> Please click the link below to reset your password." +
+                        $"<a href='{verificationLink}'> Reset Password </a>" +
+                        $"<br/>Thank You.<br/>");
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("sandboxmail@mastertechsolution.com"),
+                    Subject = "Reset Password",
+                    Body = strMailBody,
+                    IsBodyHtml = true,
+                };
+
+                mailMessage.To.Add(ToEmail);
+
+                smtpClient.Send(mailMessage);
+
+                return true;
+            }
+            catch (Exception Ex)
+            {
+                string str = Ex.Message;
+                return false;
+            }
+        }
+
+        public async Task<APICallResponse<bool>> ResetPasswordAsync(ForgotPasswordModel forgotPasswordModel)
+        {
+            return await _userManagementRepo.ResetPasswordAsync(forgotPasswordModel);
+        }
+
+        private SmtpClient GetSMTPSettings()
+        {
+            SMTPSettings smtpSettings = new SMTPSettings();
+
+            _configuration.GetSection("SMTPSettings").Bind(smtpSettings);
+
+            return new SmtpClient(smtpSettings.SMTP)
+            {
+                Port = smtpSettings.Port,
+                Credentials = new NetworkCredential(smtpSettings.Username, smtpSettings.Password),
+                EnableSsl = smtpSettings.EnableSsl,
+            };
+        }
+
     }
 }

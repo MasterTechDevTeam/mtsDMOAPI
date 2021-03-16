@@ -40,9 +40,22 @@ namespace MasterTechDMO.API.Controllers
         [Route("getRole/{userId}")]
         public async Task<IActionResult> GetRoles(Guid userId)
         {
-            
-            return Ok(await _identityRoleService.GetRolesAsync(userId));
 
+            return Ok(await _identityRoleService.GetRolesAsync(userId));
+        }
+
+        [HttpGet]
+        [Route("findRoleById/{roleId}")]
+        public async Task<IActionResult> FindRoleById(string roleId)
+        {
+            return Ok(await _identityRoleService.FindRoleByIdAsync(Guid.Parse(roleId)));
+        }
+
+        [HttpPost]
+        [Route("updateRoleById/{roleId}")]
+        public async Task<IActionResult> UpdateRoleById(DMOOrgRoles orgRoleData)
+        {
+            return Ok(await _identityRoleService.UpdateRoleByIdAsync(orgRoleData));
         }
     }
 }

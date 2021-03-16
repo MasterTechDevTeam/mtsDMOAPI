@@ -17,5 +17,11 @@ namespace MasterTechDMO.API.Repos
         Task<KeyValuePair<bool, string>> CreateBaseRoleAsync(string roleName);
 
         Task<APICallResponse<string>> GetAssignedRole(Guid userId);
+
+        Task<APICallResponse<bool>> RemoveRoleFromUserAsync(Guid userId);
+
+        Task<APICallResponse<DMOOrgRoles>> FindRoleByIdAsync(Guid roleId);
+
+        Task<APICallResponse<bool>> UpdateRoleByIdAsync(DMOOrgRoles orgRole);
     }
 }
