@@ -11,5 +11,6 @@ namespace MasterTechDMO.API.Areas.Identity.Data
         public Guid OrgId { get; set; }
         public Guid RoleId { get; set; }
         public string DisplayName { get; set; }
+        public bool IsDeactive { get; set; }
     }
 }

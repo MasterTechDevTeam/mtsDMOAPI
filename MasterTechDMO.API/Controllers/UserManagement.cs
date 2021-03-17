@@ -140,6 +140,12 @@ namespace MasterTechDMO.API.Controllers
             return Ok(await _userManagementServices.ResetPasswordAsync(forgotPasswordModel));
         }
 
+        [HttpGet]
+        [Route("removeUser/{username}")]
+        public async Task<IActionResult> RemoveUserAsync(string username)
+        {
+            return Ok(await _userManagementServices.RemoveUserAsync(username));
+        }
 
 
 

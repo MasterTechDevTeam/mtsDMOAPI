@@ -24,5 +24,7 @@ namespace MasterTechDMO.API.Repos
         Task<APICallResponse<string>> GenerateForgetPasswordTokenAsync(string EmailId);
 
         Task<APICallResponse<bool>> ResetPasswordAsync(ForgotPasswordModel forgotPasswordModel);
+
+        Task<APICallResponse<bool>> RemoveUserAsync(string username);
     }
 }

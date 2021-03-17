@@ -87,5 +87,10 @@ namespace MasterTechDMO.API.Services
         {
             return await _identityRoleManagementRepo.UpdateRoleByIdAsync(orgRole);
         }
+
+        public async Task<APICallResponse<bool>> RemoveRoleAsync(Guid orgId,string roleName)
+        {
+            return await _identityRoleManagementRepo.RemoveRoleAsync(roleName, orgId);
+        }
     }
 }

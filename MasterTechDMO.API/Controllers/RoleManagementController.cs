@@ -57,5 +57,12 @@ namespace MasterTechDMO.API.Controllers
         {
             return Ok(await _identityRoleService.UpdateRoleByIdAsync(orgRoleData));
         }
+
+        [HttpGet]
+        [Route("removeRole/{orgId}/{roleName}")]
+        public async Task<IActionResult> UpdateRoleById(Guid orgId,string roleName)
+        {
+            return Ok(await _identityRoleService.RemoveRoleAsync(orgId,roleName));
+        }
     }
 }

@@ -114,7 +114,7 @@ namespace MasterTechDMO.API.Repos
                 var lstOrgRoles = new APICallResponse<List<DMOOrgRoles>>();
                 if (orgId != null && RepoHelpers.IsOrgUser(orgId, _context))
                 {
-                    lstOrgRoles.Respose = _context.DMOOrgRoles.Where(x => x.OrgId == orgId).ToList();
+                    lstOrgRoles.Respose = _context.DMOOrgRoles.Where(x => x.OrgId == orgId && x.IsDeactive==false).ToList();
                     lstOrgRoles.Message = new List<string> { $"{lstOrgRoles.Respose.Count} roles founds." };
                     lstOrgRoles.Status = "Success";
                 }
@@ -314,7 +314,6 @@ namespace MasterTechDMO.API.Repos
 
         }
 
-
         public async Task<APICallResponse<bool>> UpdateRoleByIdAsync(DMOOrgRoles orgRole)
         {
             try
@@ -355,6 +354,43 @@ namespace MasterTechDMO.API.Repos
                 };
             }
            
+        }
+
+        public async Task<APICallResponse<bool>> RemoveRoleAsync(string roleName,Guid orgId)
+        {
+            try
+            {
+                var dbUser = _context.DMOOrgRoles.Where(x => x.DisplayName == roleName && x.OrgId == orgId).FirstOrDefault();
+                if (dbUser != null)
+                {
+                    dbUser.IsDeactive = true;
+                    _context.SaveChanges();
+                    return new APICallResponse<bool>
+                    {
+                        IsSuccess = true,
+                        Message = new List<string> { "Role removed." },
+                        Respose = true,
+                        Status = "Success"
+                    };
+                }
+                return new APICallResponse<bool>
+                {
+                    IsSuccess = true,
+                    Message = new List<string> { "Role not found." },
+                    Respose = false,
+                    Status = "Warning"
+                };
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = new List<string> { Ex.Message },
+                    Respose = false,
+                    Status = "Error"
+                };
+            }
         }
 
         #region Helper Methods

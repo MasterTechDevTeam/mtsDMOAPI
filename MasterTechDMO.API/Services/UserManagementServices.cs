@@ -397,6 +397,12 @@ namespace MasterTechDMO.API.Services
             return await _userManagementRepo.ResetPasswordAsync(forgotPasswordModel);
         }
 
+        public async Task<APICallResponse<bool>> RemoveUserAsync(string username)
+        {
+            return await _userManagementRepo.RemoveUserAsync(username);
+
+        }
+
         private SmtpClient GetSMTPSettings()
         {
             SMTPSettings smtpSettings = new SMTPSettings();

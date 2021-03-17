@@ -205,7 +205,7 @@ namespace MasterTechDMO.API.Repos
                 var lstOrgUsers = new APICallResponse<List<DMOUsers>>();
                 if (orgId != null && RepoHelpers.IsOrgUser(orgId, _context))
                 {
-                    lstOrgUsers.Respose = _context.Users.Where(x => x.OrgId == orgId).ToList();
+                    lstOrgUsers.Respose = _context.Users.Where(x => x.OrgId == orgId && x.IsDeactive==false).ToList();
                     lstOrgUsers.Message = new List<string> { $"{lstOrgUsers.Respose.Count} users founds." };
                     lstOrgUsers.Status = "Success";
                 }
@@ -362,6 +362,43 @@ namespace MasterTechDMO.API.Repos
                     Message = new List<string>() { Ex.InnerException.ToString() },
                     Status = "Error",
                     Respose = false
+                };
+            }
+        }
+
+        public async Task<APICallResponse<bool>> RemoveUserAsync(string username)
+        {
+            try
+            {
+                var dbUser = _context.Users.Where(x => x.UserName == username).FirstOrDefault();
+                if (dbUser != null)
+                {
+                    dbUser.IsDeactive = true;
+                    _context.SaveChanges();
+                    return new APICallResponse<bool>
+                    {
+                        IsSuccess = true,
+                        Message = new List<string> { "User removed." },
+                        Respose = true,
+                        Status = "Success"
+                    };
+                }
+                return new APICallResponse<bool>
+                {
+                    IsSuccess = true,
+                    Message = new List<string> { "User not found." },
+                    Respose = false,
+                    Status = "Warning"
+                };
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = new List<string> { Ex.Message },
+                    Respose = false,
+                    Status = "Error"
                 };
             }
         }
