@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MasterTechDMO.API.Areas.Identity.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace MasterTechDMO.API.Areas.Identity.Data
@@ -25,5 +19,7 @@ namespace MasterTechDMO.API.Areas.Identity.Data
         }
 
         public DbSet<DMOOrgRoles> DMOOrgRoles { get; set; }
+
+        public DbSet<DMOUserFriendList> DMOUserFriendList { get; set; }
     }
 }
