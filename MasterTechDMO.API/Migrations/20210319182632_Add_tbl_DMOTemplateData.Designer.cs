@@ -4,14 +4,16 @@ using MasterTechDMO.API.Areas.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MasterTechDMO.API.Migrations
 {
     [DbContext(typeof(MTDMOContext))]
-    partial class MTDMOContextModelSnapshot : ModelSnapshot
+    [Migration("20210319182632_Add_tbl_DMOTemplateData")]
+    partial class Add_tbl_DMOTemplateData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

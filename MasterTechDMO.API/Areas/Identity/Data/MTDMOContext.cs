@@ -21,5 +21,7 @@ namespace MasterTechDMO.API.Areas.Identity.Data
         public DbSet<DMOOrgRoles> DMOOrgRoles { get; set; }
 
         public DbSet<DMOUserFriendList> DMOUserFriendList { get; set; }
+        public DbSet<DMOTemplateData> DMOTemplateData { get; set; }
+
     }
 }
