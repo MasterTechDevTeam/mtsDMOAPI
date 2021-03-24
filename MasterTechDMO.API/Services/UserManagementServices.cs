@@ -92,8 +92,8 @@ namespace MasterTechDMO.API.Services
         {
             if (code != string.Empty)
             {
-                code = HttpUtility.UrlDecode(code, Encoding.UTF8);
-                code = code.Replace(' ', '+');
+                //code = HttpUtility.UrlDecode(code, Encoding.UTF8);
+                //code = code.Replace(' ', '+');
                 var callResponse = await _userManagementRepo.VerifyUserAsync(emailId, code);
                 return callResponse;
             }

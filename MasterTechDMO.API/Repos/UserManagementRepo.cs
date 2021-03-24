@@ -33,10 +33,10 @@ namespace MasterTechDMO.API.Repos
             {
                 var tokenCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                //tokenCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
-                tokenCode = HttpUtility.UrlEncode(tokenCode, Encoding.UTF8);
+				tokenCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
+				//tokenCode = HttpUtility.UrlEncode(tokenCode, Encoding.UTF8);
 
-                return new APICallResponse<string>
+				return new APICallResponse<string>
                 {
                     IsSuccess = true,
                     Status = "Success",
@@ -74,8 +74,8 @@ namespace MasterTechDMO.API.Repos
                     };
                 }
 
-                //code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-                var result = await _userManager.ConfirmEmailAsync(user, code);
+				code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+				var result = await _userManager.ConfirmEmailAsync(user, code);
                 if (result.Succeeded)
                 {
 
@@ -285,7 +285,9 @@ namespace MasterTechDMO.API.Repos
                     var token = await _userManager.GeneratePasswordResetTokenAsync(dbUser);
                     if (!string.IsNullOrEmpty(token))
                     {
-                        token = HttpUtility.UrlEncode(token, Encoding.UTF8);
+                        token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+                        //token = HttpUtility.UrlEncode(token, Encoding.UTF8);
                         callResponse.Respose = token;
                         callResponse.Status = "Success";
                         callResponse.Message = new List<string> { "Token generated successfully." };
@@ -328,7 +330,9 @@ namespace MasterTechDMO.API.Repos
 
                 if (dbUser != null)
                 {
-                    var changePasswordResult = await _userManager.ResetPasswordAsync(dbUser, forgotPasswordModel.Code, forgotPasswordModel.Password);
+                    var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(forgotPasswordModel.Code));
+
+                    var changePasswordResult = await _userManager.ResetPasswordAsync(dbUser, code, forgotPasswordModel.Password);
                     if (changePasswordResult.Succeeded)
                     {
                         callResponse.IsSuccess = true;
