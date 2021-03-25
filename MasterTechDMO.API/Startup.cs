@@ -41,26 +41,30 @@ namespace MasterTechDMO.API
                 .AddEntityFrameworkStores<MTDMOContext>()
                 .AddTokenProvider<DataProtectorTokenProvider<DMOUsers>>(TokenOptions.DefaultProvider);
 
+            services.Configure<DataProtectionTokenProviderOptions>(opt => {
+                opt.TokenLifespan = TimeSpan.FromHours(1);
+            });
+
             // Create Group policy
             services.AddAuthorization(option =>
-            {
-                option.AddPolicy("OnlyForOrganization", policy => policy.RequireRole("System_Admin", "Super_Admin", "Restaurant_Admin"));
-            });
+                {
+                    option.AddPolicy("OnlyForOrganization", policy => policy.RequireRole("System_Admin", "Super_Admin", "Restaurant_Admin"));
+                });
 
             var sharedTokenSettings = new SharedAccessTokenSettings();
             Configuration.Bind("JWTSettings", sharedTokenSettings);
             var tokenValidationParms = MTSharedAccessTokenService.VerifySharedTokenSettings(sharedTokenSettings);
 
             services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    {
+                        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-            }).AddJwtBearer(x =>
-            {
-                x.RequireHttpsMetadata = false;
-                x.TokenValidationParameters = tokenValidationParms;
-            });
+                    }).AddJwtBearer(x =>
+        {
+            x.RequireHttpsMetadata = false;
+            x.TokenValidationParameters = tokenValidationParms;
+        });
 
             services.AddControllers();
 
@@ -96,8 +100,8 @@ namespace MasterTechDMO.API
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "MasterTechSolution DMO API");
 
-                // To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
-                c.RoutePrefix = string.Empty;
+        // To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
+        c.RoutePrefix = string.Empty;
             });
 
             app.UseHttpsRedirection();
