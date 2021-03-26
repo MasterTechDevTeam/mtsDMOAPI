@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MasterTechDMO.API.Areas.Identity.Data;
+using MasterTechDMO.API.Helpers;
 using MasterTechDMO.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
@@ -37,11 +40,14 @@ namespace MasterTechDMO.API
                    options.UseSqlServer(
                        Configuration.GetConnectionString("MTDMOContextConnection")));
 
+            services.AddDataProtection();
+
             services.AddIdentity<DMOUsers, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<MTDMOContext>()
                 .AddTokenProvider<DataProtectorTokenProvider<DMOUsers>>(TokenOptions.DefaultProvider);
 
-            services.Configure<DataProtectionTokenProviderOptions>(opt => {
+            services.Configure<DataProtectionTokenProviderOptions>(opt =>
+            {
                 opt.TokenLifespan = TimeSpan.FromHours(1);
             });
 
@@ -65,6 +71,8 @@ namespace MasterTechDMO.API
             x.RequireHttpsMetadata = false;
             x.TokenValidationParameters = tokenValidationParms;
         });
+
+            services.AddTransient<ICipherService, CipherService>();
 
             services.AddControllers();
 
@@ -100,8 +108,8 @@ namespace MasterTechDMO.API
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "MasterTechSolution DMO API");
 
-        // To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
-        c.RoutePrefix = string.Empty;
+                // To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
+                c.RoutePrefix = string.Empty;
             });
 
             app.UseHttpsRedirection();

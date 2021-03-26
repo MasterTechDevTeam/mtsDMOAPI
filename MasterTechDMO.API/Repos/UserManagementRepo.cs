@@ -3,7 +3,9 @@ using MasterTechDMO.API.Helpers;
 using MasterTechDMO.API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using mtsDMO.Context.UserManagement;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,12 +20,19 @@ namespace MasterTechDMO.API.Repos
         private UserManager<DMOUsers> _userManager;
         private SignInManager<DMOUsers> _signInManager;
         private MTDMOContext _context;
-
-        public UserManagementRepo(UserManager<DMOUsers> userManager, SignInManager<DMOUsers> signInManager, MTDMOContext context)
+        private IConfiguration _configuration;
+        private ICipherService _cipherService;
+        public UserManagementRepo(UserManager<DMOUsers> userManager,
+            SignInManager<DMOUsers> signInManager,
+            MTDMOContext context,
+            IConfiguration configuration,
+            ICipherService cipherService)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
+            _configuration = configuration;
+            _cipherService = cipherService;
         }
 
         public async Task<APICallResponse<string>> RegisterUserAsync(DMOUsers user, string password)
@@ -31,12 +40,12 @@ namespace MasterTechDMO.API.Repos
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                var tokenCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                //var tokenCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var tokenCode = GenerateToken(user.Email, Constants.TokenType.Registration);
+                tokenCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
+                //tokenCode = HttpUtility.UrlEncode(tokenCode, Encoding.UTF8);
 
-				tokenCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
-				//tokenCode = HttpUtility.UrlEncode(tokenCode, Encoding.UTF8);
-
-				return new APICallResponse<string>
+                return new APICallResponse<string>
                 {
                     IsSuccess = true,
                     Status = "Success",
@@ -74,9 +83,10 @@ namespace MasterTechDMO.API.Repos
                     };
                 }
 
-				code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-				var result = await _userManager.ConfirmEmailAsync(user, code);
-                if (result.Succeeded)
+                code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+                var result = VerifiyToken(code);
+                //var result = await _userManager.ConfirmEmailAsync(user, code);
+                if (result.ToLower() == "success")
                 {
 
                     return new APICallResponse<bool>
@@ -90,13 +100,13 @@ namespace MasterTechDMO.API.Repos
                 }
                 else
                 {
-                    List<string> iError = result.Errors.Select(x => x.Description).ToList();
+                    //List<string> iError = result.Errors.Select(x => x.Description).ToList();
 
                     return new APICallResponse<bool>
                     {
                         IsSuccess = false,
-                        Message = iError,
-                        Status = "IdentityError",
+                        Message = new List<string> { result },
+                        Status = "Error",
                         Respose = false
                     };
                 }
@@ -205,7 +215,7 @@ namespace MasterTechDMO.API.Repos
                 var lstOrgUsers = new APICallResponse<List<DMOUsers>>();
                 if (orgId != null && RepoHelpers.IsOrgUser(orgId, _context))
                 {
-                    lstOrgUsers.Respose = _context.Users.Where(x => x.OrgId == orgId && x.IsDeactive==false).ToList();
+                    lstOrgUsers.Respose = _context.Users.Where(x => x.OrgId == orgId && x.IsDeactive == false).ToList();
                     lstOrgUsers.Message = new List<string> { $"{lstOrgUsers.Respose.Count} users founds." };
                     lstOrgUsers.Status = "Success";
                 }
@@ -404,6 +414,48 @@ namespace MasterTechDMO.API.Repos
                     Respose = false,
                     Status = "Error"
                 };
+            }
+        }
+
+        private string GenerateToken(string emailId, string TokenType)
+        {
+            try
+            {
+                string textToEnc = JsonConvert.SerializeObject(new TokenModel { EmailId = emailId, Type = TokenType, Time = DateTime.Now });
+                return _cipherService.Encrypt(textToEnc, _configuration["AppSettings:EncDecKey"]);
+            }
+            catch (Exception Ex)
+            {
+                return string.Empty;
+            }
+        }
+
+        private string VerifiyToken(string encText)
+        {
+            try
+            {
+                var decText = _cipherService.Decrypt(encText, _configuration["AppSettings:EncDecKey"]);
+                var tokenData = JsonConvert.DeserializeObject<TokenModel>(decText);
+                if (tokenData != null)
+                {
+                    if (tokenData.Time <= tokenData.Time.AddHours(Convert.ToInt32(_configuration["AppSettings:TokenValidateLife"])))
+                    {
+                        var user = _userManager.FindByEmailAsync(tokenData.EmailId).Result;
+                        if (user?.EmailConfirmed == false)
+                        {
+                            user.EmailConfirmed = true;
+                            _context.SaveChanges();
+                            return "Success";
+                        }
+                    }
+                    else
+                        return "Token expired.";
+                }
+                return string.Empty;
+            }
+            catch (Exception Ex)
+            {
+                return string.Empty;
             }
         }
     }

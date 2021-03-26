@@ -1,4 +1,5 @@
 ﻿using MasterTechDMO.API.Areas.Identity.Data;
+using MasterTechDMO.API.Helpers;
 using MasterTechDMO.API.Models;
 using MasterTechDMO.API.Repos;
 using Microsoft.AspNetCore.Identity;
@@ -26,9 +27,10 @@ namespace MasterTechDMO.API.Services
             SignInManager<DMOUsers> signInManager,
             IConfiguration configuration,
              IServiceProvider serviceProvider,
-              MTDMOContext context)
+              MTDMOContext context,
+            ICipherService cipherService)
         {
-            _userManagementRepo = new UserManagementRepo(userManager, signInManager, context);
+            _userManagementRepo = new UserManagementRepo(userManager, signInManager, context, configuration, cipherService);
             _configuration = configuration;
             _identityRoleManagementRepo = new IdentityRoleManagementRepo(serviceProvider, context);
 
@@ -341,7 +343,7 @@ namespace MasterTechDMO.API.Services
                 var tokenCallResponse = await _userManagementRepo.GenerateForgetPasswordTokenAsync(emailId);
                 if (!string.IsNullOrEmpty(tokenCallResponse.Respose))
                 {
-                    returnUrl = HttpUtility.UrlDecode(returnUrl,Encoding.UTF8);
+                    returnUrl = HttpUtility.UrlDecode(returnUrl, Encoding.UTF8);
                     returnUrl = returnUrl.Replace("<% CODE %>", tokenCallResponse.Respose);
                     SendResetPasswordMail(returnUrl, emailId);
                 }

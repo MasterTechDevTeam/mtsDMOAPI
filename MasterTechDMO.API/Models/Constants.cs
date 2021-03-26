@@ -14,5 +14,11 @@ namespace MasterTechDMO.API.Models
             public const string Indevidual = "SingleUser";
             public const string MTAdmin = "MTAdmin";
         }
+
+        public struct TokenType
+        {
+            public const string Registration = "EmailConfirmation";
+            public const string ResetPassword = "ResetPassword";
+        }
     }
 }

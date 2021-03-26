@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using mtsDMO.Context.UserManagement;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using MasterTechDMO.API.Helpers;
 
 namespace MasterTechDMO.API.Controllers
 {
@@ -31,10 +32,11 @@ namespace MasterTechDMO.API.Controllers
             SignInManager<DMOUsers> signInManager,
             IServiceProvider serviceProvider,
              IConfiguration confifuraton,
-             MTDMOContext context)
+             MTDMOContext context,
+             ICipherService cipherService)
         {
             _identityRoleService = new IdentityRoleService(serviceProvider, context);
-            _userManagementServices = new UserManagementServices(userManager, signInManager, confifuraton, serviceProvider, context);
+            _userManagementServices = new UserManagementServices(userManager, signInManager, confifuraton, serviceProvider, context, cipherService);
         }
 
 
