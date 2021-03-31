@@ -3,6 +3,7 @@ using MasterTechDMO.API.Helpers;
 using MasterTechDMO.API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using mtsDMO.Context.UserManagement;
 using Newtonsoft.Json;
@@ -97,6 +98,16 @@ namespace MasterTechDMO.API.Repos
                         Respose = true
                     };
 
+                }
+                else if (result.ToLower() == "verified")
+                {
+                    return new APICallResponse<bool>
+                    {
+                        IsSuccess = true,
+                        Status = "Success",
+                        Message = new List<string>() { "User Already Verified." },
+                        Respose = true
+                    };
                 }
                 else
                 {
@@ -247,7 +258,7 @@ namespace MasterTechDMO.API.Repos
             }
         }
 
-        public async Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserDetails userDetails)
+        public async Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserProfile userDetails)
         {
             try
             {
@@ -292,7 +303,8 @@ namespace MasterTechDMO.API.Repos
                 var dbUser = await _userManager.FindByNameAsync(EmailId);
                 if (dbUser != null)
                 {
-                    var token = await _userManager.GeneratePasswordResetTokenAsync(dbUser);
+                    //var token = await _userManager.GeneratePasswordResetTokenAsync(dbUser);
+                    var token = GenerateToken(EmailId, Constants.TokenType.ResetPassword);
                     if (!string.IsNullOrEmpty(token))
                     {
                         token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
@@ -341,22 +353,69 @@ namespace MasterTechDMO.API.Repos
                 if (dbUser != null)
                 {
                     var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(forgotPasswordModel.Code));
+                    var result = VerifiyToken(code);
 
-                    var changePasswordResult = await _userManager.ResetPasswordAsync(dbUser, code, forgotPasswordModel.Password);
-                    if (changePasswordResult.Succeeded)
+                    //var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(forgotPasswordModel.Code));
+                    if (result.ToLower() == "success")
                     {
-                        callResponse.IsSuccess = true;
-                        callResponse.Respose = true;
-                        callResponse.Message = new List<string> { "Password Chaanged successfully." };
-                        callResponse.Status = "Success";
+                        var resetHashedPassword = _userManager.PasswordHasher.HashPassword(dbUser, forgotPasswordModel.ConfirmPassword);
+                        if (resetHashedPassword != null)
+                        {
+                            dbUser.PasswordHash = resetHashedPassword;
+                            _context.Entry(dbUser).State = EntityState.Modified;
+                            await _context.SaveChangesAsync();
+
+                            callResponse.IsSuccess = true;
+                            callResponse.Respose = true;
+                            callResponse.Message = new List<string> { "Password Chaanged successfully." };
+                            callResponse.Status = "Success";
+                        }
+                        else
+                        {
+                            callResponse.IsSuccess = true;
+                            callResponse.Status = "Warning";
+                            callResponse.Respose = false;
+                            callResponse.Message = new List<string> { "Oops, Something went wrong. Try again." };
+                        }
+
+                    }
+                    else if (result.ToLower() == "verified")
+                    {
+                        return new APICallResponse<bool>
+                        {
+                            IsSuccess = true,
+                            Status = "Success",
+                            Message = new List<string>() { "User Already Verified." },
+                            Respose = true
+                        };
                     }
                     else
                     {
-                        callResponse.IsSuccess = true;
-                        callResponse.Status = "Warning";
-                        callResponse.Respose = false;
-                        callResponse.Message = new List<string> { "Oops, Something went wrong. Try again." };
+                        //List<string> iError = result.Errors.Select(x => x.Description).ToList();
+
+                        return new APICallResponse<bool>
+                        {
+                            IsSuccess = false,
+                            Message = new List<string> { result },
+                            Status = "Error",
+                            Respose = false
+                        };
                     }
+                    //var changePasswordResult = await _userManager.ResetPasswordAsync(dbUser, code, forgotPasswordModel.Password);
+                    //if (changePasswordResult.Succeeded)
+                    //{
+                    //    callResponse.IsSuccess = true;
+                    //    callResponse.Respose = true;
+                    //    callResponse.Message = new List<string> { "Password Chaanged successfully." };
+                    //    callResponse.Status = "Success";
+                    //}
+                    //else
+                    //{
+                    //    callResponse.IsSuccess = true;
+                    //    callResponse.Status = "Warning";
+                    //    callResponse.Respose = false;
+                    //    callResponse.Message = new List<string> { "Oops, Something went wrong. Try again." };
+                    //}
                 }
                 else
                 {
@@ -441,12 +500,15 @@ namespace MasterTechDMO.API.Repos
                     if (tokenData.Time <= tokenData.Time.AddHours(Convert.ToInt32(_configuration["AppSettings:TokenValidateLife"])))
                     {
                         var user = _userManager.FindByEmailAsync(tokenData.EmailId).Result;
-                        if (user?.EmailConfirmed == false)
+                        if (user?.EmailConfirmed == false && tokenData.Type == Constants.TokenType.Registration)
                         {
                             user.EmailConfirmed = true;
                             _context.SaveChanges();
                             return "Success";
                         }
+                        else if (tokenData.Type == Constants.TokenType.ResetPassword) return "Success";
+                        else
+                            return "Verified";
                     }
                     else
                         return "Token expired.";
@@ -456,6 +518,43 @@ namespace MasterTechDMO.API.Repos
             catch (Exception Ex)
             {
                 return string.Empty;
+            }
+        }
+
+        public async Task<APICallResponse<List<OrganizationsData>>> GetOrganizationAsync()
+        {
+            try
+            {
+                var orgList = _context.Users.Where(x => x.IsOrg == true).Select(x => new OrganizationsData(Guid.Parse(x.Id), x.FirstName, x.LastName)).ToList();
+                if (orgList != null)
+                {
+                    return new APICallResponse<List<OrganizationsData>>
+                    {
+                        IsSuccess = true,
+                        Message = new List<string> { $"{orgList.Count} organization found." },
+                        Respose = orgList,
+                        Status = "Success"
+                    };
+                }
+                else
+                    return new APICallResponse<List<OrganizationsData>>
+                    {
+                        IsSuccess = true,
+                        Message = new List<string> { $"No organization found." },
+                        Respose = orgList,
+                        Status = "Warning"
+                    };
+
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<List<OrganizationsData>>
+                {
+                    IsSuccess = false,
+                    Message = new List<string> { Ex.Message },
+                    Respose = null,
+                    Status = "Error"
+                };
             }
         }
     }

@@ -19,12 +19,14 @@ namespace MasterTechDMO.API.Repos
 
         Task<APICallResponse<List<DMOUsers>>> GetUsersAsync(Guid orgId);
 
-        Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserDetails userDetails);
+        Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserProfile userDetails);
 
         Task<APICallResponse<string>> GenerateForgetPasswordTokenAsync(string EmailId);
 
         Task<APICallResponse<bool>> ResetPasswordAsync(ForgotPasswordModel forgotPasswordModel);
 
         Task<APICallResponse<bool>> RemoveUserAsync(string username);
+
+        Task<APICallResponse<List<OrganizationsData>>> GetOrganizationAsync();
     }
 }

@@ -55,12 +55,7 @@ namespace MasterTechDMO.API.Services
                     ContactNo = user.ContactNo,
                     DateofBirth = user.DateofBirth,
                     IsOrg = user.UserType == Constants.BaseRole.Org ? true : false,
-                    OrgId = Guid.Empty,
-                    Address = user.Address,
-                    City = user.City,
-                    Zipcode = user.Zipcode,
-                    State = user.State,
-                    Country = user.Country
+                    OrgId = user.OrgId
                 };
                 var callResponse = await _userManagementRepo.RegisterUserAsync(dmoUser, user.Password);
                 if (callResponse.IsSuccess)
@@ -184,11 +179,11 @@ namespace MasterTechDMO.API.Services
             }
         }
 
-        public async Task<APICallResponse<UserDetails>> GetUserByEmailAsync(string EmailId)
+        public async Task<APICallResponse<UserProfile>> GetUserByEmailAsync(string EmailId)
         {
             try
             {
-                APICallResponse<UserDetails> data = new APICallResponse<UserDetails>();
+                APICallResponse<UserProfile> data = new APICallResponse<UserProfile>();
                 var result = await _userManagementRepo.GetUserByEmailAsync(EmailId);
 
                 data.IsSuccess = result.IsSuccess;
@@ -212,7 +207,7 @@ namespace MasterTechDMO.API.Services
                         assignedRole = roleResult.Respose;
                     }
 
-                    UserDetails userDetails = new UserDetails
+                    UserProfile userDetails = new UserProfile
                     {
                         UserId = Guid.Parse(result.Respose.Id),
                         FirstName = result.Respose.FirstName,
@@ -236,7 +231,7 @@ namespace MasterTechDMO.API.Services
             }
             catch (Exception Ex)
             {
-                return new APICallResponse<UserDetails>()
+                return new APICallResponse<UserProfile>()
                 {
                     IsSuccess = false,
                     Message = new List<string>() { Ex.InnerException.ToString() },
@@ -246,9 +241,9 @@ namespace MasterTechDMO.API.Services
             }
         }
 
-        public async Task<APICallResponse<List<UserDetails>>> GetUsersAsync(Guid userId)
+        public async Task<APICallResponse<List<UserProfile>>> GetUsersAsync(Guid userId)
         {
-            var callReponse = new APICallResponse<List<UserDetails>>();
+            var callReponse = new APICallResponse<List<UserProfile>>();
 
             var userInRoleResponse = await _identityRoleManagementRepo.CheckUserInRole(userId);
             if (userInRoleResponse.IsSuccess && userInRoleResponse.Status == "Success")
@@ -256,7 +251,7 @@ namespace MasterTechDMO.API.Services
                 var lstOrgUsers = await _userManagementRepo.GetUsersAsync(userId);
                 if (lstOrgUsers != null)
                 {
-                    List<UserDetails> lstUsers = new List<UserDetails>();
+                    List<UserProfile> lstUsers = new List<UserProfile>();
                     foreach (var user in lstOrgUsers.Respose)
                     {
                         string assignedRole = string.Empty;
@@ -277,7 +272,7 @@ namespace MasterTechDMO.API.Services
                             userType = Constants.BaseRole.Indevidual;
 
                         lstUsers.Add(
-                            new UserDetails
+                            new UserProfile
                             {
                                 Address = user.Address,
                                 City = user.City,
@@ -309,7 +304,7 @@ namespace MasterTechDMO.API.Services
             }
             else
             {
-                return new APICallResponse<List<UserDetails>>
+                return new APICallResponse<List<UserProfile>>
                 {
                     IsSuccess = userInRoleResponse.IsSuccess,
                     Message = userInRoleResponse.Message,
@@ -319,7 +314,7 @@ namespace MasterTechDMO.API.Services
             }
         }
 
-        public async Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserDetails userDetails)
+        public async Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserProfile userDetails)
         {
             var callResponse = await _userManagementRepo.UpdateUserDetailsAsync(userDetails);
 
@@ -417,6 +412,11 @@ namespace MasterTechDMO.API.Services
                 Credentials = new NetworkCredential(smtpSettings.Username, smtpSettings.Password),
                 EnableSsl = smtpSettings.EnableSsl,
             };
+        }
+
+        public async Task<APICallResponse<List<OrganizationsData>>> GetOrganizationAsync()
+        {
+            return await _userManagementRepo.GetOrganizationAsync();
         }
 
     }

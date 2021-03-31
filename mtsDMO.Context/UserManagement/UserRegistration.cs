@@ -16,6 +16,7 @@ namespace mtsDMO.Context.UserManagement
 		[Required]
 		[Compare("Password")]
 		public string ConfirmPassword { get; set; }
+
 		
 	}
 }

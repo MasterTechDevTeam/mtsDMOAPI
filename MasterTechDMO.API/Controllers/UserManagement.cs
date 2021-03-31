@@ -111,7 +111,7 @@ namespace MasterTechDMO.API.Controllers
 
         [HttpPost]
         [Route("updateUserDetails")]
-        public async Task<IActionResult> UpdateUserDetailsAsync(UserDetails userDetails)
+        public async Task<IActionResult> UpdateUserDetailsAsync(UserProfile userDetails)
         {
             return Ok(await _userManagementServices.UpdateUserDetailsAsync(userDetails));
         }
@@ -147,6 +147,14 @@ namespace MasterTechDMO.API.Controllers
         public async Task<IActionResult> RemoveUserAsync(string username)
         {
             return Ok(await _userManagementServices.RemoveUserAsync(username));
+        }
+
+        [HttpGet]
+        [Route("getOrganization")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetOrganizationAsync()
+        {
+            return Ok(await _userManagementServices.GetOrganizationAsync());
         }
 
 
