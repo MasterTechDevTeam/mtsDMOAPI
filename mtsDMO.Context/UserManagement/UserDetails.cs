@@ -30,5 +30,6 @@ namespace mtsDMO.Context.UserManagement
 
         public string AssignedRole { get; set; }
         public Guid OrgId { get; set; }
+        public bool IsVerified { get; set; }
     }
 }

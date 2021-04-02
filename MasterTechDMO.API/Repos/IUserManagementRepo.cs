@@ -28,5 +28,7 @@ namespace MasterTechDMO.API.Repos
         Task<APICallResponse<bool>> RemoveUserAsync(string username);
 
         Task<APICallResponse<List<OrganizationsData>>> GetOrganizationAsync();
+
+        Task<APICallResponse<bool>> VerifyUserAsAdminAsync(string emailId);
     }
 }

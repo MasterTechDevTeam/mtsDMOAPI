@@ -85,6 +85,41 @@ namespace MasterTechDMO.API.Services
 
         }
 
+
+        public async Task<APICallResponse<string>> RegisterUserAsAdminAsync(UserRegistration user)
+        {
+            if (user != null)
+            {
+                var dmoUser = new DMOUsers
+                {
+                    Id = user.UserId.ToString(),
+                    Email = user.EmailId,
+                    UserName = user.EmailId,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    ContactNo = user.ContactNo,
+                    DateofBirth = user.DateofBirth,
+                    IsOrg = user.UserType == Constants.BaseRole.Org ? true : false,
+                    OrgId = user.OrgId,
+                    EmailConfirmed = true
+                };
+                var callResponse = await _userManagementRepo.RegisterUserAsync(dmoUser, user.Password);
+
+
+                return callResponse;
+            }
+
+            return new APICallResponse<string>()
+            {
+                IsSuccess = false,
+                Message = new List<string>() { "User object is null." },
+                Status = "Warning",
+                Respose = string.Empty
+            };
+
+        }
+
+
         public async Task<APICallResponse<bool>> VerifyUserAsync(string emailId, string code)
         {
             if (code != string.Empty)
@@ -286,7 +321,8 @@ namespace MasterTechDMO.API.Services
                                 UserId = Guid.Parse(user.Id),
                                 Zipcode = user.Zipcode,
                                 AssignedRole = assignedRole,
-                                UserType = userType
+                                UserType = userType,
+                                IsVerified = user.EmailConfirmed
                             });
                     }
                     callReponse.Respose = lstUsers;
@@ -397,7 +433,6 @@ namespace MasterTechDMO.API.Services
         public async Task<APICallResponse<bool>> RemoveUserAsync(string username)
         {
             return await _userManagementRepo.RemoveUserAsync(username);
-
         }
 
         private SmtpClient GetSMTPSettings()
@@ -417,6 +452,11 @@ namespace MasterTechDMO.API.Services
         public async Task<APICallResponse<List<OrganizationsData>>> GetOrganizationAsync()
         {
             return await _userManagementRepo.GetOrganizationAsync();
+        }
+
+        public async Task<APICallResponse<bool>> VerifyUserAsAdminAsync(string emailId)
+        {
+            return await _userManagementRepo.VerifyUserAsAdminAsync(emailId);
         }
 
     }

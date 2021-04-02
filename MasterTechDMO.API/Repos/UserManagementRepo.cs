@@ -41,6 +41,17 @@ namespace MasterTechDMO.API.Repos
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
+                if (user.EmailConfirmed)
+                {
+                    return new APICallResponse<string>
+                    {
+                        IsSuccess = true,
+                        Status = "Success",
+                        Message = new List<string>() { "User Registered." },
+                        Respose = ""
+                    };
+                }
+
                 //var tokenCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var tokenCode = GenerateToken(user.Email, Constants.TokenType.Registration);
                 tokenCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenCode));
@@ -553,6 +564,45 @@ namespace MasterTechDMO.API.Repos
                     IsSuccess = false,
                     Message = new List<string> { Ex.Message },
                     Respose = null,
+                    Status = "Error"
+                };
+            }
+        }
+
+        public async Task<APICallResponse<bool>> VerifyUserAsAdminAsync(string emailId)
+        {
+            try
+            {
+                var dbUser = _context.Users.Where(x => x.Email == emailId).FirstOrDefault();
+                if (dbUser?.EmailConfirmed == false)
+                {
+                    dbUser.EmailConfirmed = true;
+                    _context.Entry(dbUser).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    return new APICallResponse<bool>
+                    { 
+                        IsSuccess = true,
+                        Message = new List<string> { $"{emailId} verified" },
+                        Respose = true,
+                        Status = "Success"
+                    };
+                }
+                return new APICallResponse<bool>
+                {
+                    IsSuccess = true,
+                    Message = new List<string> { $"{emailId} not found" },
+                    Respose = true,
+                    Status = "Success"
+                };
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = new List<string> { Ex.Message },
+                    Respose = false,
                     Status = "Error"
                 };
             }

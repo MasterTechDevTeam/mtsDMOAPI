@@ -67,6 +67,23 @@ namespace MasterTechDMO.API.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("registerUserAsAdmin")]
+        public async Task<IActionResult> RegisterUserAsAdminAsync(UserRegistration user)
+        {
+            try
+            {
+                string returnURL = string.Empty;
+
+                var userRegisterReponse = await _userManagementServices.RegisterUserAsAdminAsync(user);
+                return Ok(userRegisterReponse);
+            }
+            catch (Exception Ex)
+            {
+                return StatusCode(500, Ex.Message);
+            }
+        }
+
         [HttpGet]
         [Route("verifyUser")]
         [AllowAnonymous]
@@ -107,6 +124,13 @@ namespace MasterTechDMO.API.Controllers
         public async Task<IActionResult> GetUsersAsync(Guid userId)
         {
             return Ok(await _userManagementServices.GetUsersAsync(userId));
+        }
+
+        [HttpGet]
+        [Route("verifyUserAsAdmin/{emailId}")]
+        public async Task<IActionResult> VerifyUserAsAdminAsync(string emailId)
+        {
+            return Ok(await _userManagementServices.VerifyUserAsAdminAsync(emailId));
         }
 
         [HttpPost]
