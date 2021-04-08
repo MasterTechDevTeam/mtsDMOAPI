@@ -22,6 +22,7 @@ namespace MasterTechDMO.API.Areas.Identity.Data
 
         public DbSet<DMOUserFriendList> DMOUserFriendList { get; set; }
         public DbSet<DMOTemplateData> DMOTemplateData { get; set; }
+        public DbSet<DMOTaskScheduler> DMOTaskScheduler { get; set; }
 
     }
 }
