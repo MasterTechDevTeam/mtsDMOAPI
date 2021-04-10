@@ -24,9 +24,15 @@ namespace MasterTechDMO.API.Repos
                 var dbTask = _context.DMOTaskScheduler.Where(x => x.Id == taskSchedulerData.Id).FirstOrDefault();
                 if (dbTask != null)
                 {
+                    dbTask.Attendee = taskSchedulerData.Attendee;
+                    dbTask.Description = taskSchedulerData.Description;
+                    dbTask.EndDate = taskSchedulerData.EndDate;
+                    dbTask.IsFullDay = taskSchedulerData.IsFullDay;
+                    dbTask.StartDate = taskSchedulerData.StartDate;
+                    dbTask.Subject = taskSchedulerData.Subject;
+                    dbTask.ThemeColor = taskSchedulerData.ThemeColor;
                     dbTask.UpdUser = taskSchedulerData.InsUser;
                     dbTask.UpdDT = DateTime.Now;
-                    _context.Entry(dbTask).State = EntityState.Modified;
 
                     callResponse.Message = new List<string> { "Task Updated" };
                     callResponse.Respose = true;
@@ -61,7 +67,7 @@ namespace MasterTechDMO.API.Repos
             try
             {
                 var callResponse = new APICallResponse<List<DMOTaskScheduler>>();
-                var dbTaskList = _context.DMOTaskScheduler.Where(x => x.UserId == userId).ToList();
+                var dbTaskList = _context.DMOTaskScheduler.Where(x => x.UserId == userId || x.Attendee.Contains(userId.ToString())).ToList();
                 if (dbTaskList != null)
                 {
 

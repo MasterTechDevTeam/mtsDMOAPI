@@ -7,6 +7,7 @@ using MasterTechDMO.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using mtsDMO.Context.Utility;
 
@@ -19,9 +20,9 @@ namespace MasterTechDMO.API.Controllers
     {
         private TaskSchedulerService _taskSchedulerService;
 
-        public TaskSchedulerController(MTDMOContext context)
+        public TaskSchedulerController(MTDMOContext context, UserManager<DMOUsers> userManager)
         {
-            _taskSchedulerService = new TaskSchedulerService(context);
+            _taskSchedulerService = new TaskSchedulerService( userManager, context);
         }
 
         [HttpGet]
@@ -52,11 +53,11 @@ namespace MasterTechDMO.API.Controllers
             return Ok(await _taskSchedulerService.AddUpdateTaskAsync(taskData));
         }
 
-        //[HttpPost]
-        //[Route("updateTask")]
-        //public async Task<IActionResult> UpdateTemplateAsync(SchedulerData taskData)
-        //{
-        //    return Ok(await _taskSchedulerService.AddUpdateTaskAsync(taskData));
-        //}
+        [HttpGet]
+        [Route("getNotification/{userId}")]
+        public async Task<IActionResult> UpdateTemplateAsync(Guid userId)
+        {
+            return Ok(await _taskSchedulerService.GetNotificationsAsync(userId));
+        }
     }
 }

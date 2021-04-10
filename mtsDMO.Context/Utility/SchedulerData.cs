@@ -17,6 +17,7 @@ namespace mtsDMO.Context.Utility
         public DateTime? EndDate { get; set; }
         public string ThemeColor { get; set; }
         public bool IsFullDay { get; set; }
+        public List<Guid> Attendee { get; set; }
 
     }
 }
