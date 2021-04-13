@@ -1,4 +1,5 @@
 ﻿using MasterTechDMO.API.Areas.Identity.Data;
+using MasterTechDMO.API.Helpers;
 using MasterTechDMO.API.Models;
 using MasterTechDMO.API.Repos;
 using Microsoft.AspNetCore.Identity;
@@ -139,40 +140,58 @@ namespace MasterTechDMO.API.Services
 
         public async Task<APICallResponse<List<NotificationDetails>>> GetNotificationsAsync(Guid userId)
         {
-            var callResponse = await GetAllTaskAsync(userId);
-            if (callResponse.Respose != null)
+            try
             {
-                var data = callResponse.Respose.Where(x => x.IsFullDay == true || x.EndDate.Value >= DateTime.Now).ToList();
-                var lstNotifications = new List<NotificationDetails>();
 
-                foreach (var task in data)
+
+                var callResponse = await GetAllTaskAsync(userId);
+                if (callResponse.Respose != null)
                 {
-                    var notification = new NotificationDetails();
-                    var userInfo = _userManager.FindByIdAsync(userId.ToString()).Result;
-                    notification.Creator = $"{userInfo.FirstName} {userInfo.LastName}";
-                    notification.Description = task.Description;
-                    notification.EndTime = task.EndDate;
-                    notification.StartTime = task.StartDate;
-                    notification.Title = task.Subject;
-                    lstNotifications.Add(notification);
+                    var currentDT = DateTime.Now;
+                    var data = callResponse.Respose.Where(x => (x.EndDate.HasValue && x.EndDate.Value >= RepoHelpers.ConvertDateTime(currentDT)) || x.IsFullDay == true).ToList();
+                    var lstNotifications = new List<NotificationDetails>();
+
+                    foreach (var task in data)
+                    {
+                        var notification = new NotificationDetails();
+                        var userInfo = _userManager.FindByIdAsync(userId.ToString()).Result;
+                        notification.Creator = $"{userInfo.FirstName} {userInfo.LastName}";
+                        notification.Description = task.Description;
+                        if (task.EndDate != null)
+                            notification.EndTime = RepoHelpers.ConvertDateTime(task.EndDate.Value);
+                        notification.StartTime = RepoHelpers.ConvertDateTime(task.StartDate);
+                        notification.Title = task.Subject;
+                        lstNotifications.Add(notification);
+                    }
+
+                    return new APICallResponse<List<NotificationDetails>>
+                    {
+                        IsSuccess = true,
+                        Message = new List<string>() { "Notification Found" },
+                        Respose = lstNotifications,
+                        Status = "Success"
+                    };
                 }
+                else
+                {
+                    return new APICallResponse<List<NotificationDetails>>
+                    {
+                        IsSuccess = callResponse.IsSuccess,
+                        Message = callResponse.Message,
+                        Respose = null,
+                        Status = callResponse.Status
+                    };
+                }
+            }
+            catch (Exception Ex)
+            {
 
                 return new APICallResponse<List<NotificationDetails>>
                 {
-                    IsSuccess = true,
-                    Message = new List<string>() { "Notification Found" },
-                    Respose = lstNotifications,
-                    Status = "Success"
-                };
-            }
-            else
-            {
-                return new APICallResponse<List<NotificationDetails>>
-                {
-                    IsSuccess = callResponse.IsSuccess,
-                    Message = callResponse.Message,
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message },
                     Respose = null,
-                    Status = callResponse.Status
+                    Status = "Error"
                 };
             }
         }

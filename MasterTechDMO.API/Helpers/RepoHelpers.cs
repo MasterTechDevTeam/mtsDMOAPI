@@ -2,6 +2,7 @@
 using MasterTechDMO.API.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -64,6 +65,11 @@ namespace MasterTechDMO.API.Helpers
             {
                 return false;
             }
+        }
+
+        public static DateTime ConvertDateTime(DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day,dateTime.Hour,dateTime.Minute,dateTime.Second);
         }
     }
 }
