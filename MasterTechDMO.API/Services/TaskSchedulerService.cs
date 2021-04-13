@@ -158,8 +158,8 @@ namespace MasterTechDMO.API.Services
                         notification.Creator = $"{userInfo.FirstName} {userInfo.LastName}";
                         notification.Description = task.Description;
                         if (task.EndDate != null)
-                            notification.EndTime = RepoHelpers.ConvertDateTime(task.EndDate.Value);
-                        notification.StartTime = RepoHelpers.ConvertDateTime(task.StartDate);
+                            notification.EndTime = task.EndDate.Value.ToString("MM/dd/yyyy hh:mm tt");
+                        notification.StartTime = task.StartDate.ToString("MM/dd/yyyy hh:mm tt");
                         notification.Title = task.Subject;
                         lstNotifications.Add(notification);
                     }
