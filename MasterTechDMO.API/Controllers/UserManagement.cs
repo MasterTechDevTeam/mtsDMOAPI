@@ -127,6 +127,13 @@ namespace MasterTechDMO.API.Controllers
         }
 
         [HttpGet]
+        [Route("getFellowEmployees/{userId}")]
+        public async Task<IActionResult> getFellowEmployeesAsync(Guid userId)
+        {
+            return Ok(await _userManagementServices.GetFellowEmployeesAsync(userId));
+        }
+
+        [HttpGet]
         [Route("verifyUserAsAdmin/{emailId}")]
         public async Task<IActionResult> VerifyUserAsAdminAsync(string emailId)
         {

@@ -11,7 +11,7 @@ namespace MasterTechDMO.API.Helpers
     public class RepoHelpers
     {
 
-        public static bool IsOrgUser(Guid orgId,MTDMOContext context)
+        public static bool IsOrgUser(Guid orgId, MTDMOContext context)
         {
             try
             {
@@ -67,9 +67,27 @@ namespace MasterTechDMO.API.Helpers
             }
         }
 
+        public static bool IsOrgEmploee(Guid userId, MTDMOContext context)
+        {
+            try
+            {
+                var userData = context.Users.Where(x => x.Id == userId.ToString() && x.OrgId != null).FirstOrDefault();
+                if (userData != null)
+                {
+                    return  true;
+                }
+                else
+                    return false;
+            }
+            catch (Exception Ex)
+            {
+                return false;
+            }
+        }
+
         public static DateTime ConvertDateTime(DateTime dateTime)
         {
-            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day,dateTime.Hour,dateTime.Minute,dateTime.Second);
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second);
         }
     }
 }

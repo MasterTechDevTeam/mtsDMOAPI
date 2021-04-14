@@ -6,9 +6,11 @@ using MasterTechDMO.API.Areas.Identity.Data;
 using MasterTechDMO.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using mtsDMO.Context.Utility;
 
 namespace MasterTechDMO.API.Controllers
@@ -20,9 +22,9 @@ namespace MasterTechDMO.API.Controllers
     {
         private TaskSchedulerService _taskSchedulerService;
 
-        public TaskSchedulerController(MTDMOContext context, UserManager<DMOUsers> userManager)
+        public TaskSchedulerController(MTDMOContext context, UserManager<DMOUsers> userManager, IConfiguration configuration, IHostingEnvironment environmen)
         {
-            _taskSchedulerService = new TaskSchedulerService( userManager, context);
+            _taskSchedulerService = new TaskSchedulerService( userManager, context,configuration,environmen);
         }
 
         [HttpGet]

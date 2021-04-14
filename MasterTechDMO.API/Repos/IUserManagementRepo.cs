@@ -30,5 +30,7 @@ namespace MasterTechDMO.API.Repos
         Task<APICallResponse<List<OrganizationsData>>> GetOrganizationAsync();
 
         Task<APICallResponse<bool>> VerifyUserAsAdminAsync(string emailId);
+
+        Task<APICallResponse<List<DMOUsers>>> GetFellowEmployeesAsync(Guid userId);
     }
 }

@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using MasterTechDMO.API.Models;
+using MasterTechDMO.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,84 +18,86 @@ namespace MasterTechDMO.API.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UtilitiesController : ControllerBase
     {
-        private IConfiguration _configuration;
+        private UtilityServices _utilityService;
         public UtilitiesController(IConfiguration configuration)
         {
-            _configuration = configuration;
+            _utilityService = new UtilityServices(configuration);
         }
 
         [HttpPost]
         [Route("SendMail")]
         public async Task<IActionResult> SendMailAsync(MailData mailData)
         {
-            var callResponse = new APICallResponse<bool>();
-            try
-            {
-                var smtpClient = GetSMTPSettings();
+            return Ok(await _utilityService.SendMailAsync(mailData));
 
-                string strMailBody = string.Empty;
-                strMailBody = mailData.Message;
+            //var callResponse = new APICallResponse<bool>();
+            //try
+            //{
+            //    var smtpClient = GetSMTPSettings();
 
-                var mailMessage = new MailMessage
-                {
-                    From = new MailAddress("sandboxmail@mastertechsolution.com",mailData.From),
-                    Subject = mailData.Subject,
-                    Body = strMailBody,
-                    IsBodyHtml = true,
-                };
+            //    string strMailBody = string.Empty;
+            //    strMailBody = mailData.Message;
 
-                foreach (var to in mailData.To)
-                {
-                    mailMessage.To.Add(to);
-                }
+            //    var mailMessage = new MailMessage
+            //    {
+            //        From = new MailAddress("sandboxmail@mastertechsolution.com",mailData.From),
+            //        Subject = mailData.Subject,
+            //        Body = strMailBody,
+            //        IsBodyHtml = true,
+            //    };
 
-                foreach (var cc in mailData.Cc)
-                {
-                    mailMessage.To.Add(cc);
-                }
+            //    foreach (var to in mailData.To)
+            //    {
+            //        mailMessage.To.Add(to);
+            //    }
 
-                foreach (var bcc in mailData.Bcc)
-                {
-                    mailMessage.To.Add(bcc);
-                }
+            //    foreach (var cc in mailData.Cc)
+            //    {
+            //        mailMessage.To.Add(cc);
+            //    }
 
-                Attachment mailAttaachment;
-                foreach (var attachment in mailData.AttachmentItemPath)
-                {
-                    mailAttaachment = new Attachment(attachment);
-                    mailMessage.Attachments.Add(mailAttaachment);
-                }
+            //    foreach (var bcc in mailData.Bcc)
+            //    {
+            //        mailMessage.To.Add(bcc);
+            //    }
 
-                callResponse.IsSuccess = true;
-                callResponse.Message = new List<string> { "Mail send." };
-                callResponse.Respose = true;
-                callResponse.Status = "Success";
+            //    Attachment mailAttaachment;
+            //    foreach (var attachment in mailData.AttachmentItemPath)
+            //    {
+            //        mailAttaachment = new Attachment(attachment);
+            //        mailMessage.Attachments.Add(mailAttaachment);
+            //    }
 
-                smtpClient.Send(mailMessage);
-            }
-            catch (Exception Ex)
-            {
-                callResponse.IsSuccess = false;
-                callResponse.Message = new List<string> { Ex.Message };
-                callResponse.Respose = false;
-                callResponse.Status = "Success";
-            }
+            //    callResponse.IsSuccess = true;
+            //    callResponse.Message = new List<string> { "Mail send." };
+            //    callResponse.Respose = true;
+            //    callResponse.Status = "Success";
 
-            return Ok(callResponse);
+            //    smtpClient.Send(mailMessage);
+            //}
+            //catch (Exception Ex)
+            //{
+            //    callResponse.IsSuccess = false;
+            //    callResponse.Message = new List<string> { Ex.Message };
+            //    callResponse.Respose = false;
+            //    callResponse.Status = "Success";
+            //}
+
+            //return Ok(callResponse);
         }
 
-        private SmtpClient GetSMTPSettings()
-        {
-            SMTPSettings smtpSettings = new SMTPSettings();
+        //private SmtpClient GetSMTPSettings()
+        //{
+        //    SMTPSettings smtpSettings = new SMTPSettings();
 
-            _configuration.GetSection("SMTPSettings").Bind(smtpSettings);
+        //    _configuration.GetSection("SMTPSettings").Bind(smtpSettings);
 
-            return new SmtpClient(smtpSettings.SMTP)
-            {
-                Port = smtpSettings.Port,
-                Credentials = new NetworkCredential(smtpSettings.Username, smtpSettings.Password),
-                EnableSsl = smtpSettings.EnableSsl,
-            };
-        }
+        //    return new SmtpClient(smtpSettings.SMTP)
+        //    {
+        //        Port = smtpSettings.Port,
+        //        Credentials = new NetworkCredential(smtpSettings.Username, smtpSettings.Password),
+        //        EnableSsl = smtpSettings.EnableSsl,
+        //    };
+        //}
     }
 }

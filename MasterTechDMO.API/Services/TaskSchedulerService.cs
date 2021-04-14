@@ -2,10 +2,13 @@
 using MasterTechDMO.API.Helpers;
 using MasterTechDMO.API.Models;
 using MasterTechDMO.API.Repos;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using mtsDMO.Context.Utility;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,11 +18,15 @@ namespace MasterTechDMO.API.Services
     {
         private ITaskSchedulerRepo _taskSchedulerRepo;
         private UserManager<DMOUsers> _userManager;
+        private UtilityServices _utilityServices;
+        private IHostingEnvironment _environment;
 
-        public TaskSchedulerService(UserManager<DMOUsers> userManager, MTDMOContext context)
+        public TaskSchedulerService(UserManager<DMOUsers> userManager, MTDMOContext context, IConfiguration configuration, IHostingEnvironment environment)
         {
             _taskSchedulerRepo = new TaskSchedulerRepo(context);
             _userManager = userManager;
+            _environment = environment;
+            _utilityServices = new UtilityServices(configuration);
         }
 
         public async Task<APICallResponse<List<SchedulerData>>> GetAllTaskAsync(Guid userId)
@@ -135,15 +142,46 @@ namespace MasterTechDMO.API.Services
                 UserId = schedulerData.UserId
             };
 
-            return await _taskSchedulerRepo.AddUpdateTaskAsync(data);
+
+            var res = await _taskSchedulerRepo.AddUpdateTaskAsync(data);
+
+            if (res.IsSuccess)
+            {
+                var mailData = new MailData();
+
+                mailData.From = _userManager.FindByIdAsync(schedulerData.UserId.ToString()).Result?.Email;
+
+                mailData.Cc.Add(mailData.From);
+
+                foreach (var attendeeId in schedulerData.Attendee)
+                {
+                    mailData.To.Add(_userManager.FindByIdAsync(attendeeId.ToString()).Result?.Email);
+                }
+
+                mailData.Subject = schedulerData.Subject;
+
+                string htmlTemplate = File.ReadAllText(Path.Combine(_environment.WebRootPath, "Templates", "SchedulerTemplate.html"));
+
+                htmlTemplate = htmlTemplate.Replace("<% CREATOR_NAME %>", mailData.From);
+                htmlTemplate = htmlTemplate.Replace("<% Name %>", schedulerData.Subject);
+                htmlTemplate = htmlTemplate.Replace("<% FROM %>", schedulerData.StartDate.ToString("MM/dd/yyyy hh:mm tt"));
+                htmlTemplate = htmlTemplate.Replace("<% Details %>", schedulerData.Description);
+                if (schedulerData.IsFullDay)
+                    htmlTemplate = htmlTemplate.Replace("<% TO %>", schedulerData.StartDate.ToString("MM/dd/yyyy hh:mm tt"));
+                else
+                    htmlTemplate = htmlTemplate.Replace("<% TO %>", schedulerData.EndDate.Value.ToString("MM/dd/yyyy hh:mm tt"));
+
+                mailData.Message = htmlTemplate;
+
+                _utilityServices.SendMailAsync(mailData);
+            }
+            return res;
         }
 
         public async Task<APICallResponse<List<NotificationDetails>>> GetNotificationsAsync(Guid userId)
         {
             try
             {
-
-
                 var callResponse = await GetAllTaskAsync(userId);
                 if (callResponse.Respose != null)
                 {
@@ -185,7 +223,6 @@ namespace MasterTechDMO.API.Services
             }
             catch (Exception Ex)
             {
-
                 return new APICallResponse<List<NotificationDetails>>
                 {
                     IsSuccess = false,

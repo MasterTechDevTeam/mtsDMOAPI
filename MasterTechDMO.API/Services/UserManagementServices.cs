@@ -350,6 +350,80 @@ namespace MasterTechDMO.API.Services
             }
         }
 
+        public async Task<APICallResponse<List<UserProfile>>> GetFellowEmployeesAsync(Guid userId)
+        {
+            var callReponse = new APICallResponse<List<UserProfile>>();
+            try
+            {
+
+                var lstOrgUsers = await _userManagementRepo.GetFellowEmployeesAsync(userId);
+                if (lstOrgUsers != null)
+                {
+                    List<UserProfile> lstUsers = new List<UserProfile>();
+                    foreach (var user in lstOrgUsers.Respose)
+                    {
+                        string assignedRole = string.Empty;
+                        string userType = string.Empty;
+
+                        var result = await _identityRoleManagementRepo.GetAssignedRole(Guid.Parse(user.Id));
+
+                        if (result.IsSuccess && result.Status == "Success")
+                        {
+                            assignedRole = result.Respose;
+                        }
+
+                        if (user.IsOrg)
+                            userType = Constants.BaseRole.Org;
+                        else if (user.OrgId != null)
+                            userType = Constants.BaseRole.OrgUser;
+                        else
+                            userType = Constants.BaseRole.Indevidual;
+
+                        lstUsers.Add(
+                            new UserProfile
+                            {
+                                Address = user.Address,
+                                City = user.City,
+                                ContactNo = user.ContactNo,
+                                Country = user.Country,
+                                DateofBirth = user.DateofBirth,
+                                EmailId = user.Email,
+                                FirstName = user.FirstName,
+                                LastName = user.LastName,
+                                State = user.State,
+                                UserId = Guid.Parse(user.Id),
+                                Zipcode = user.Zipcode,
+                                AssignedRole = assignedRole,
+                                UserType = userType,
+                                IsVerified = user.EmailConfirmed
+                            });
+                    }
+                    callReponse.Respose = lstUsers;
+                    callReponse.IsSuccess = true;
+                    callReponse.Message = lstOrgUsers.Message;
+                    callReponse.Status = "Success";
+                    return callReponse;
+                }
+
+                callReponse.Respose = null;
+                callReponse.IsSuccess = lstOrgUsers.IsSuccess;
+                callReponse.Message = lstOrgUsers.Message;
+                callReponse.Status = "Warning";
+                return callReponse;
+            }
+            catch (Exception Ex)
+            {
+
+                return new APICallResponse<List<UserProfile>>
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message},
+                    Respose = null,
+                    Status ="Error"
+                };
+            }
+        }
+
         public async Task<APICallResponse<bool>> UpdateUserDetailsAsync(UserProfile userDetails)
         {
             var callResponse = await _userManagementRepo.UpdateUserDetailsAsync(userDetails);

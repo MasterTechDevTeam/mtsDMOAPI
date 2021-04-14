@@ -581,7 +581,7 @@ namespace MasterTechDMO.API.Repos
                     await _context.SaveChangesAsync();
 
                     return new APICallResponse<bool>
-                    { 
+                    {
                         IsSuccess = true,
                         Message = new List<string> { $"{emailId} verified" },
                         Respose = true,
@@ -604,6 +604,40 @@ namespace MasterTechDMO.API.Repos
                     Message = new List<string> { Ex.Message },
                     Respose = false,
                     Status = "Error"
+                };
+            }
+        }
+
+        public async Task<APICallResponse<List<DMOUsers>>> GetFellowEmployeesAsync(Guid userId)
+        {
+            try
+            {
+                var lstOrgUsers = new APICallResponse<List<DMOUsers>>();
+                if (userId != null && RepoHelpers.IsOrgEmploee(userId, _context))
+                {
+                    var userOrgId = _userManager.FindByIdAsync(userId.ToString()).Result?.OrgId;
+                    lstOrgUsers.Respose = _context.Users.Where(x => x.OrgId == userOrgId.Value && x.IsDeactive == false).ToList();
+                    lstOrgUsers.Message = new List<string> { $"{lstOrgUsers.Respose.Count} users founds." };
+                    lstOrgUsers.Status = "Success";
+                }
+                else
+                {
+                    lstOrgUsers.Respose = null;
+                    lstOrgUsers.Message = new List<string> { "Either user not found or user is missing permission." };
+                    lstOrgUsers.Status = "Warning";
+                }
+
+                lstOrgUsers.IsSuccess = true;
+                return lstOrgUsers;
+            }
+            catch (Exception Ex)
+            {
+                return new APICallResponse<List<DMOUsers>>
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { Ex.Message },
+                    Status = "Error",
+                    Respose = null
                 };
             }
         }
