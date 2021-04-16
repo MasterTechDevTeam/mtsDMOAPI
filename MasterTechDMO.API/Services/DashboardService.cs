@@ -107,7 +107,7 @@ namespace MasterTechDMO.API.Services
 
             var lstOrgUsers = await _dashboardRepo.GetUsersAsync(userId);
 
-            if (lstOrgUsers != null)
+            if (lstOrgUsers.Respose != null)
             {
                 List<UserProfile> lstUsers = new List<UserProfile>();
                 foreach (var user in lstOrgUsers.Respose)
