@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using MasterTechDMO.API.Areas.Identity.Data;
 using MasterTechDMO.API.Helpers;
@@ -62,15 +64,14 @@ namespace MasterTechDMO.API
             var tokenValidationParms = MTSharedAccessTokenService.VerifySharedTokenSettings(sharedTokenSettings);
 
             services.AddAuthentication(x =>
-                    {
-                        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-                    }).AddJwtBearer(x =>
-        {
-            x.RequireHttpsMetadata = false;
-            x.TokenValidationParameters = tokenValidationParms;
-        });
+                {
+                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(x =>
+                {
+                    x.RequireHttpsMetadata = false;
+                    x.TokenValidationParameters = tokenValidationParms;
+                });
 
             services.AddTransient<ICipherService, CipherService>();
 
@@ -78,6 +79,11 @@ namespace MasterTechDMO.API
 
             services.AddSwaggerGen(c =>
             {
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+                c.IncludeXmlComments(xmlPath);
+
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "MasterTechSolution DMO",
@@ -90,6 +96,37 @@ namespace MasterTechDMO.API
                         Url = new Uri("https://mastertechsolution.com")
                     }
                 });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample:Bearer abcdef1234",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+
+
+                //c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                //{
+                //    {
+                //        new OpenApiSecurityScheme
+                //        {
+                //             Reference = new OpenApiReference
+                //             {
+                //                Type = ReferenceType.SecurityScheme,
+                //                Id = "Bearer"
+                //             },
+                //             Scheme = "oauth2",
+                //             Name = "Bearer",
+                //             In = ParameterLocation.Header,
+                //        },
+                //         new List<string>()
+                //    }
+                //});
+
+                c.OperationFilter<SwaggerPadlockFilter>();
             });
 
 
@@ -106,10 +143,13 @@ namespace MasterTechDMO.API
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
+
+
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "MasterTechSolution DMO API");
 
                 // To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
                 c.RoutePrefix = string.Empty;
+
             });
 
             app.UseHttpsRedirection();

@@ -27,6 +27,11 @@ namespace MasterTechDMO.API.Controllers
             _taskSchedulerService = new TaskSchedulerService( userManager, context,configuration,environmen);
         }
 
+        /// <summary>
+        /// Return the list of all scheduled task
+        /// </summary>
+        /// <param name="userId">userId of User</param>
+        /// <returns>Return object of Ok(200)</returns>
         [HttpGet]
         [Route("getAllTask/{userId}")]
         public async Task<IActionResult> GetAllTaskAsync(Guid userId)
@@ -34,6 +39,11 @@ namespace MasterTechDMO.API.Controllers
             return Ok(await _taskSchedulerService.GetAllTaskAsync(userId));
         }
 
+        /// <summary>
+        /// Return the details of task
+        /// </summary>
+        /// <param name="taskId">taskId of requested task</param>
+        /// <returns>Return object of Ok(200)</returns>
         [HttpGet]
         [Route("getTaskDetails/{taskId}")]
         public async Task<IActionResult> GetTaskDetailsAsync(Guid taskId)
@@ -41,6 +51,11 @@ namespace MasterTechDMO.API.Controllers
             return Ok(await _taskSchedulerService.GetTaskDetailsAsync(taskId));
         }
 
+        /// <summary>
+        /// Remove the scheduled task for the user
+        /// </summary>
+        /// <param name="taskId">taskId of task</param>
+        /// <returns>Return object of Ok(200)</returns>
         [HttpGet]
         [Route("removeTask/{taskId}")]
         public async Task<IActionResult> RemoveTaskAsync(Guid taskId)
@@ -48,6 +63,11 @@ namespace MasterTechDMO.API.Controllers
             return Ok(await _taskSchedulerService.RemoveTaskAsync(taskId));
         }
 
+        /// <summary>
+        /// Scheduled the task for the user
+        /// </summary>
+        /// <param name="taskData">Object of SchedulerData Type</param>
+        /// <returns>Return object of Ok(200)</returns>
         [HttpPost]
         [Route("addTask")]
         public async Task<IActionResult> AddTaskAsync(SchedulerData taskData)
@@ -55,6 +75,11 @@ namespace MasterTechDMO.API.Controllers
             return Ok(await _taskSchedulerService.AddUpdateTaskAsync(taskData));
         }
 
+        /// <summary>
+        /// Return list of all the task in which user is maintion
+        /// </summary>
+        /// <param name="userId">userId of user</param>
+        /// <returns>Return object of Ok(200)</returns>
         [HttpGet]
         [Route("getNotification/{userId}")]
         public async Task<IActionResult> UpdateTemplateAsync(Guid userId)

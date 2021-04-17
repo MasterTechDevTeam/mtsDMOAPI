@@ -23,7 +23,11 @@ namespace MasterTechDMO.API.Controllers
         {
             _utilityService = new UtilityServices(configuration);
         }
-
+        /// <summary>
+        /// Utility for send mail
+        /// </summary>
+        /// <param name="mailData">Object of mailData</param>
+        /// <returns></returns>
         [HttpPost]
         [Route("SendMail")]
         public async Task<IActionResult> SendMailAsync(MailData mailData)
