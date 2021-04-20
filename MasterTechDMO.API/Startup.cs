@@ -28,13 +28,14 @@ namespace MasterTechDMO.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, Microsoft.AspNetCore.Hosting.IHostingEnvironment environment)
         {
             Configuration = configuration;
+            Environment = environment;
         }
 
         public IConfiguration Configuration { get; }
-
+        public Microsoft.AspNetCore.Hosting.IHostingEnvironment Environment;
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -79,10 +80,10 @@ namespace MasterTechDMO.API
 
             services.AddSwaggerGen(c =>
             {
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
-                c.IncludeXmlComments(xmlPath);
+                c.IncludeXmlComments(Path.Combine(Environment.WebRootPath,"Doc", "MasterTechDMO_API_Doc.xml"));
 
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {

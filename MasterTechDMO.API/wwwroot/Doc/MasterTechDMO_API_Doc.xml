@@ -1,0 +1,303 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MasterTechDMO.API</name>
+    </assembly>
+    <members>
+        <member name="T:MasterTechDMO.API.Controllers.DashboardController">
+            <summary>
+            APIs for Dashboard
+            </summary>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.DashboardController.GetFriendsAsync(System.Guid)">
+            <summary>
+            Return the list of top 5 friend for dashboard
+            </summary>
+            <param name="userId">userId of user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.DashboardController.GetTaskAsync(System.Guid)">
+            <summary>
+            Return list of top 5 task
+            </summary>
+            <param name="userId">userId of user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.DashboardController.GetTemplateAsync(System.Guid)">
+            <summary>
+            Return list of top 5 template
+            </summary>
+            <param name="userId">userId of user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.DashboardController.GetAllUsersAsync(System.Guid)">
+            <summary>
+            Return list of top 5 user if requested user is either admin or organization
+            </summary>
+            <param name="userId">userId of user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.DashboardController.GetRolesAsync(System.Guid)">
+            <summary>
+            Return list of top 5 roles if requested user is either admin or organization
+            </summary>
+            <param name="userId">userId of user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.DashboardController.GetDashboardDetailsAsync(System.Guid)">
+            <summary>
+            Return list of top 5 Roles,User,Task and Template for user in single API call
+            </summary>
+            <param name="userId">userId of user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.EditorController.GetAllTemplateAsync(System.Guid)">
+            <summary>
+            Return list of templates for created by user
+            </summary>
+            <param name="userId">userId of user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.EditorController.GetTemplateDetailsAsync(System.Guid)">
+            <summary>
+            Return template data of requested templateId
+            </summary>
+            <param name="templateId">templateId of template</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.EditorController.RemoveTemplateAsync(System.Guid)">
+            <summary>
+            Remove template of requested templateId
+            </summary>
+            <param name="templateId">templateId of template</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.EditorController.AddTemplateAsync(mtsDMO.Context.Utility.TemplateData)">
+            <summary>
+            Will Add template for user
+            </summary>
+            <param name="templateData">Object of TemplateData Type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.EditorController.UpdateTemplateAsync(mtsDMO.Context.Utility.TemplateData)">
+            <summary>
+            Will update template for user
+            </summary>
+            <param name="templateData">Object of TemplateData Type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.RoleManagementController.CreateRoleAsync(mtsDMO.Context.RoleManagement.CreateRoleDetails)">
+            <summary>
+            Create role for organization
+            </summary>
+            <param name="roleDetails">Object of CreateRoleDetails Type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.RoleManagementController.GetRoles(System.Guid)">
+            <summary>
+            Return list of roles details requested by organization
+            </summary>
+            <param name="userId">OrganizationId of organization</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.RoleManagementController.FindRoleById(System.String)">
+            <summary>
+            Return role data
+            </summary>
+            <param name="roleId">roleId of Role</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.RoleManagementController.UpdateRoleById(MasterTechDMO.API.Areas.Identity.Data.DMOOrgRoles)">
+            <summary>
+            Update role
+            </summary>
+            <param name="orgRoleData">Object of DMOOrgRoles Type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.RoleManagementController.UpdateRoleById(System.Guid,System.String)">
+            <summary>
+            Remove role for requested organization
+            </summary>
+            <param name="orgId">orgId of Organization</param>
+            <param name="roleName">name of Role</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.TaskSchedulerController.GetAllTaskAsync(System.Guid)">
+            <summary>
+            Return the list of all scheduled task
+            </summary>
+            <param name="userId">userId of User</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.TaskSchedulerController.GetTaskDetailsAsync(System.Guid)">
+            <summary>
+            Return the details of task
+            </summary>
+            <param name="taskId">taskId of requested task</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.TaskSchedulerController.RemoveTaskAsync(System.Guid)">
+            <summary>
+            Remove the scheduled task for the user
+            </summary>
+            <param name="taskId">taskId of task</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.TaskSchedulerController.AddTaskAsync(mtsDMO.Context.Utility.SchedulerData)">
+            <summary>
+            Scheduled the task for the user
+            </summary>
+            <param name="taskData">Object of SchedulerData Type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.TaskSchedulerController.UpdateTemplateAsync(System.Guid)">
+            <summary>
+            Return list of all the task in which user is maintion
+            </summary>
+            <param name="userId">userId of user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserFriendController.GetFriendListAsync(System.Guid)">
+            <summary>
+            Return list of friend
+            </summary>
+            <param name="userId">userId of User</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserFriendController.GetFriendDataByEmailAsync(System.Guid,System.String)">
+            <summary>
+            Retunr the details of friend
+            </summary>
+            <param name="userId">userId of Requestd user</param>
+            <param name="friendEmailId">emailId of frined for find the details</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserFriendController.UpdateFriendDataAsync(mtsDMO.Context.Utility.UserFriendData)">
+            <summary>
+            Update the friend details
+            </summary>
+            <param name="friendData">Object of UserFriendData Type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserFriendController.AddFriendDataAsync(mtsDMO.Context.Utility.UserFriendData)">
+            <summary>
+            Add friend to user
+            </summary>
+            <param name="friendData">Object of UserFriendData</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserFriendController.RemoveFriendAsync(System.Guid,System.String)">
+            <summary>
+            Remove friend from the contact list of user
+            </summary>
+            <param name="userId">userId of requestd user</param>
+            <param name="username">emailId of friend you want to remove</param>
+            <returns></returns>
+        </member>
+        <member name="T:MasterTechDMO.API.Controllers.UserManagement">
+            <summary>
+            API for User Management like Login, Registration
+            </summary>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.RegisterUserAsync(mtsDMO.Context.UserManagement.UserRegistration,System.String)">
+            <summary>
+            Register new user 
+            </summary>
+            <param name="user">Object of UserRegistration type</param>
+            <param name="returnUrl">returnUrl of dmo application</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.RegisterUserAsAdminAsync(mtsDMO.Context.UserManagement.UserRegistration)">
+            <summary>
+            Register user as admin or as an organization after login.
+            </summary>
+            <param name="user">Object of UserRegistration type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.VerifyUserAsync(System.String,System.String)">
+            <summary>
+            Will verify the verification send to the user in email
+            </summary>
+            <param name="verificationCode">Verificaion Code from email</param>
+            <param name="emailId">emailId to verify user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.LoginUserAsync(mtsDMO.Context.UserManagement.UserLogin)">
+            <summary>
+            Login user
+            </summary>
+            <param name="user">Object of UserLogin type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.GetUserByEmailAsync(System.String)">
+            <summary>
+            Return the details of requested user 
+            </summary>
+            <param name="EmailId">EmailId of User</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.GetUsersAsync(System.Guid)">
+            <summary>
+            Return the user details of requested user
+            </summary>
+            <param name="userId">userId of User</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.getFellowEmployeesAsync(System.Guid)">
+            <summary>
+            Return the fellow employee list if user is an organization user
+            </summary>
+            <param name="userId">userId of user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.VerifyUserAsAdminAsync(System.String)">
+            <summary>
+            Verify the user when user is created either by admin  or by organization.
+            </summary>
+            <param name="emailId">emailId of user.</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.UpdateUserDetailsAsync(mtsDMO.Context.UserManagement.UserProfile)">
+            <summary>
+            Will update the user profile of user
+            </summary>
+            <param name="userDetails">Object of UserProfile type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.SendResetPasswordMailAsync(System.String,System.String)">
+            <summary>
+            Will send the reset password mail to the requested user
+            </summary>
+            <param name="EmailId">EmailId of user</param>
+            <param name="returnUrl">returnUrl of application</param>
+            <returns></returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.ResetPasswordAsync(mtsDMO.Context.UserManagement.ForgotPasswordModel)">
+            <summary>
+            Will reset the password for the user
+            </summary>
+            <param name="forgotPasswordModel">Object of forgotPasswordModel type</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.RemoveUserAsync(System.String)">
+            <summary>
+            Will Remove user if requestd by either admin or organization
+            </summary>
+            <param name="username">emailId of the user</param>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UserManagement.GetOrganizationAsync">
+            <summary>
+            Return the list of  Organization
+            </summary>
+            <returns>Return object of Ok(200)</returns>
+        </member>
+        <member name="M:MasterTechDMO.API.Controllers.UtilitiesController.SendMailAsync(mtsDMO.Context.Utility.MailData)">
+            <summary>
+            Utility for send mail
+            </summary>
+            <param name="mailData">Object of mailData</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
