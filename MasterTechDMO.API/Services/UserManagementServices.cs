@@ -55,7 +55,7 @@ namespace MasterTechDMO.API.Services
                     ContactNo = user.ContactNo,
                     DateofBirth = user.DateofBirth,
                     IsOrg = user.UserType == Constants.BaseRole.Org ? true : false,
-                    OrgId = user.OrgId
+                    OrgId = user.UserType == Constants.BaseRole.Indevidual ? Guid.Empty : user.OrgId
                 };
                 var callResponse = await _userManagementRepo.RegisterUserAsync(dmoUser, user.Password);
                 if (callResponse.IsSuccess)
@@ -417,9 +417,9 @@ namespace MasterTechDMO.API.Services
                 return new APICallResponse<List<UserProfile>>
                 {
                     IsSuccess = false,
-                    Message = new List<string>() { Ex.Message},
+                    Message = new List<string>() { Ex.Message },
                     Respose = null,
-                    Status ="Error"
+                    Status = "Error"
                 };
             }
         }

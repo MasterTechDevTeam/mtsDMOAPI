@@ -71,7 +71,7 @@ namespace MasterTechDMO.API.Helpers
         {
             try
             {
-                var userData = context.Users.Where(x => x.Id == userId.ToString() && x.OrgId != null).FirstOrDefault();
+                var userData = context.Users.Where(x => x.Id == userId.ToString() && x.OrgId != Guid.Empty).FirstOrDefault();
                 if (userData != null)
                 {
                     return  true;

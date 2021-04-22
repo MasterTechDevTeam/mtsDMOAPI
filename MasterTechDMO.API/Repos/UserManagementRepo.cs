@@ -617,6 +617,13 @@ namespace MasterTechDMO.API.Repos
                 {
                     var userOrgId = _userManager.FindByIdAsync(userId.ToString()).Result?.OrgId;
                     lstOrgUsers.Respose = _context.Users.Where(x => x.OrgId == userOrgId.Value && x.IsDeactive == false).ToList();
+                    lstOrgUsers.Respose.Add(_userManager.Users.Where(x=>x.Id == userOrgId.ToString()).FirstOrDefault());
+                    lstOrgUsers.Message = new List<string> { $"{lstOrgUsers.Respose.Count} users founds." };
+                    lstOrgUsers.Status = "Success";
+                }
+                else if(userId != null &&  RepoHelpers.IsOrgUser(userId,_context))
+                {
+                    lstOrgUsers.Respose = _context.Users.Where(x => x.OrgId == userId && x.IsDeactive == false).ToList();
                     lstOrgUsers.Message = new List<string> { $"{lstOrgUsers.Respose.Count} users founds." };
                     lstOrgUsers.Status = "Success";
                 }
