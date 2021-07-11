@@ -39,6 +39,13 @@ namespace MasterTechDMO.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder => builder.AllowAnyOrigin());
+            });
+
             services.AddDbContext<MTDMOContext>(options =>
                    options.UseSqlServer(
                        Configuration.GetConnectionString("MTDMOContextConnection")));
@@ -75,7 +82,7 @@ namespace MasterTechDMO.API
                 });
 
             services.AddTransient<ICipherService, CipherService>();
-
+          
             services.AddControllers();
 
             services.AddSwaggerGen(c =>
@@ -140,6 +147,11 @@ namespace MasterTechDMO.API
             {
                 app.UseDeveloperExceptionPage();
             }
+
+
+            app.UseCors(
+                option => option.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+                ) ;
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
